@@ -1,0 +1,53 @@
+from settings import *
+
+
+class Blast(object):
+    """Class to create Blast object and align for protein and translated DNA searches."""
+
+    def __init__(self, input_file, output_file=None, tax_class = None ,program='blastp', num_threads=32):
+        """Creates Blast object for running NCBI BLAST algorithm."""
+        self.input_file = input_file
+        if output_file == None:
+            f_path, f_name = os.path.split(input_file)
+            self.output_file = os.path.join(f_path, "{}.blastRes.xml".format(f_name))
+        else:
+            self.output_file = output_file
+        self.db = PATH
+
+        self.program = program
+        self.tax_class = tax_class
+        self.num_threads = num_threads
+        self.outfmt = 6
+
+    def __repr__(self):
+        """Returns Blast class full object."""
+        return "Blast({}".format(self.__dict__)
+
+    def run(self):
+
+        """Runs BLAST algorithm."""
+        db_name = "protein_" + self.tax_class + ".db"
+        print(db_name)
+
+        os.system('{program} -query {input} -db {path} \
+					-num_threads {num_threads} -outfmt {outfmt} -out {output_file}' \
+            .format(
+            program=self.program,
+            num_threads=self.num_threads,
+            outfmt=self.outfmt,
+            input=self.input_file,
+            path=os.path.join(self.db, db_name),
+            output_file=self.output_file
+        )
+        )
+
+        print('{program} -query {input} -db {path}  -num_threads {num_threads} -outfmt {outfmt} -out {output_file}' \
+            .format(
+            program=self.program,
+            num_threads=self.num_threads,
+            outfmt=self.outfmt,
+            input=self.input_file,
+            path=os.path.join(self.db, db_name),
+            output_file=self.output_file
+        ))
+
