@@ -7,8 +7,15 @@ import argparse
 
 class makedatabase(object):
     def __init__(self):
+<<<<<<< HEAD
         self.cpu_count = os.cpu_count()
 
+=======
+        # """
+        self.cpu_count = os.cpu_count()
+
+
+>>>>>>> eacbca3da2cb9e7278c934f260583853a33684a4
     def database(self):
         parser = self.database_args()
         args = parser.parse_args(sys.argv[2:])
@@ -27,5 +34,13 @@ class makedatabase(object):
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     m = makedatabase()
     m.database()
+=======
+    time_start = time.time()
+    m = makedatabase()
+    m.database()
+    time_end = time.time()
+    print('totally cost', time_end - time_start)
+>>>>>>> eacbca3da2cb9e7278c934f260583853a33684a4
