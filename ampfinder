@@ -7,24 +7,10 @@ class MainBase(object):
     def __init__(self, api=False):
         # """
         self.cpu_count = os.cpu_count()
-<<<<<<< HEAD
-=======
-        USAGE = '''%(prog)s <command> [<args>]
-            commands are:
-               ---------------------------------------------------------------------------------------
-
-
-               '''
-
-        parser = argparse.ArgumentParser(prog="amp", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION),
-                                         epilog=SOFTWARE_SUMMARY, usage=USAGE)
-        parser.add_argument('command', choices=['main', 'tab', 'parser', 'load', 'clean'], help='Subcommand to run')
->>>>>>> eacbca3da2cb9e7278c934f260583853a33684a4
 
     def main(self):
         parser = self.main_args()
         args = parser.parse_args(sys.argv[2:])
-<<<<<<< HEAD
         self.main_run(args)
 
 
@@ -33,18 +19,6 @@ class MainBase(object):
                                          description="{} - {} - main".format(APP_NAME, SOFTWARE_VERSION))
         parser.add_argument('-i', '--input_sequence', dest="input_sequence", required=True, \
                             help='input file must be in FASTA (contig and protein) format! e.g myFile.fasta')
-=======
-        print(args)
-        self.main_run(args)
-
-
-
-    def main_args(self):
-        parser = argparse.ArgumentParser(prog="amp main",
-                                         description="{} - {} - Main".format(APP_NAME, SOFTWARE_VERSION))
-        parser.add_argument('-i', '--input_sequence', dest="input_sequence", required=True, \
-                            help='input file must be in either FASTA (contig and protein) or gzip format! e.g myFile.fasta, myFasta.fasta.gz')
->>>>>>> eacbca3da2cb9e7278c934f260583853a33684a4
         parser.add_argument('-o', '--output_file', dest="output_file", required=True,
                             help="output folder and base filename")
         parser.add_argument('-t', '--input_type', dest="input_type",
@@ -62,15 +36,6 @@ class MainBase(object):
                             help="number of threads (CPUs) to use in the BLAST search (default={})".format(
                                 self.cpu_count))
 
-<<<<<<< HEAD
-=======
-        parser.add_argument('-c', '--tax_class', dest="tax_class",
-                            default="all",
-                            choices=['Arc', 'Bac','Euk','Fgl','Vir','all'],
-                            help="choose tax_class")
-
-        parser.add_argument('--clean', dest="clean", action="store_true", help="removes temporary files")
->>>>>>> eacbca3da2cb9e7278c934f260583853a33684a4
         parser.add_argument('-v', '--version', action='version', version="{}".format(SOFTWARE_VERSION),
                             help="prints software version number")
         return parser
@@ -79,117 +44,6 @@ class MainBase(object):
         amp_obj = AMP(**vars(args))
         amp_obj.run()
 
-<<<<<<< HEAD
 if __name__ == '__main__':
     m = MainBase()
     m.main()
-=======
-    '''
-    def load(self):
-        parser = self.load_args()
-        args = parser.parse_args(sys.argv[2:])
-        self.load_run(args)
-
-    def load_args(self):
-        parser = app.load.create_parser()
-        return parser
-
-    def load_run(self, args):
-        app.load.main(args)
- 
-    def card_annotation(self):
-        parser = self.card_annotation_args()
-        args = parser.parse_args(sys.argv[2:])
-        self.card_annotation_run(args)
-
-    def card_annotation_args(self):
-        parser = app.card_annotation.create_parser()
-        return parser
-    
-
-    
-
-    def card_annotation_run(self, args):
-        app.card_annotation.main(args)
-
-
-    def clean(self):
-        parser = self.clean_args()
-        args = parser.parse_args(sys.argv[2:])
-        self.clean_run(args)
-    
-    def clean_args(self):
-        parser = app.clean.create_parser()
-        return parser
-
-    
-    def clean_run(self, args):
-        app.clean.main(args)
-    
-    
-    
-    def database(self):
-        parser = self.database_args()
-        args = parser.parse_args(sys.argv[2:])
-        print(self.database_run(args))
-
-    def database_args(self):
-        parser = argparse.ArgumentParser(prog="amp database",
-                                         description="{} - {} - Database".format(APP_NAME, SOFTWARE_VERSION))
-        parser.add_argument('-v', '--version', action='store_true', required=True, help="prints data version number")
-        parser.add_argument('--local', dest="local_database", action='store_true',
-                            help="use local database (default: uses database in executable directory)")
-        parser.add_argument('--all', action='store_true',
-                            help="data version number used for `rgi bwt` and `rgi main` (default: rgi main)")
-        return parser
-
-    def database_run(self, args):
-        data_version = ""
-        # path to loaded database files
-        if args.local_database:
-            db = LOCAL_DATABASE
-            # error if it doesn't exist
-            if not os.path.exists(LOCAL_DATABASE):
-                print("Error: missing local directory: {}".format(LOCAL_DATABASE))
-                print("Please run `rgi load --local -i <path to card.json>` to create local database.")
-                print("See `rgi load --help` to upload the card.json to rgi application.\n".format(
-                    os.path.abspath(LOCAL_DATABASE)))
-                exit()
-        else:
-            db = data_path
-
-        indecies_directory = os.path.join(db, "loaded_databases.json")
-
-        if os.path.isfile(indecies_directory) == True:
-            with open(indecies_directory) as json_file:
-                json_data = json.load(json_file)
-                if args.all == True:
-                    kmers_str = ",".join(json_data["card_kmers"]["kmer_sizes"])
-                    if kmers_str == "":
-                        kmers_str = "N/A"
-                    data_version = ("card_canonical: {} | card_variants: {} | kmer_sizes: {}".format(
-                        json_data["card_canonical"]["data_version"],
-                        json_data["card_variants"]["data_version"],
-                        kmers_str
-                    )
-                    )
-                else:
-                    data_version = json_data["card_canonical"]["data_version"]
-        else:
-            print('\nError: no databases found in data path: {}. \nSee `rgi load --help`\n'.format(os.path.abspath(db)))
-            exit()
-
-        if data_version == "":
-            print('\nError: no databases found in data path: {}. \nSee `rgi load --help`\n'.format(os.path.abspath(db)))
-
-        return data_version
-        '''
-
-
-if __name__ == '__main__':
-    time_start = time.time()
-    m = MainBase()
-    m.main()
-    time_end = time.time()
-    print('totally cost',time_end-time_start)
->>>>>>> eacbca3da2cb9e7278c934f260583853a33684a4
