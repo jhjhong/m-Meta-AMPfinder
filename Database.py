@@ -30,7 +30,7 @@ class Database():
             with open(os.path.join(working_directory, "database.fasta"), 'a') as fout:
                 for i in range(0, len(data)):
                     header = (data[i]['dbAMP_ID'])
-                    sequence = data[i]['Sequence']
+                    sequence = data[i]['Seq']
                     fout.write(">{}\n".format(header))
                     fout.write("{}\n".format(sequence))
 
