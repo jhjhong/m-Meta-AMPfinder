@@ -50,7 +50,7 @@ We provided two test files: **example_protein.fasta** and **example_dna.fasta**.
 The following command will bring up AMPfinder's main help menu:
 `python ampfinder main -h`
 
-    AMPfinder - 0.0.3 - main
+    AMPfinder - 1.1.0 - main
     
     optional arguments:
       -h, --help            show this help message and exit
