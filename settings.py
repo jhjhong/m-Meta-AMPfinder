@@ -4,7 +4,6 @@ import logging
 import json
 
 from Bio.Blast import NCBIXML
-from Bio.Alphabet import generic_dna
 from Bio.Seq import Seq
 from Bio import SeqIO
 
@@ -22,8 +21,25 @@ script_path = determine_path()
 path = os.path.join(script_path, "_db/")
 data_path = os.path.join(script_path, "_data/")
 
-APP_NAME="AMPfinder"
-SOFTWARE_VERSION = "0.0.3"
-SOFTWARE_SUMMARY = 'ampfinder'
+# ====================================================================================
+# LOGGING CONFIG
+# ====================================================================================
+level = logging.WARNING
+logger = logging.getLogger(__name__)
+logger.setLevel(level)
+
+# detailed log
+# formatter = logging.Formatter('%(levelname)s %(asctime)s : (%(filename)s::%(funcName)s::%(lineno)d) : %(message)s')
+# basic log
+formatter = logging.Formatter('%(levelname)s %(asctime)s : %(message)s')
+
+stream_handler = logging.StreamHandler()
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(stream_handler)
+
+APP_NAME="Meta-ACPfinder"
+SOFTWARE_VERSION = "0.0.1"
+SOFTWARE_SUMMARY = 'Use the Meta-ACPfinder to predict candidate ACP from protein or nucleotide'
 
 PATH = os.getcwd()
