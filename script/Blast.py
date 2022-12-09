@@ -1,4 +1,4 @@
-from settings import *
+from script.settings import *
 
 
 class Blast(object):

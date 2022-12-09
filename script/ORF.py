@@ -1,7 +1,7 @@
 
 import logging
 import tempfile, time, fileinput, math, multiprocessing, shutil
-from settings import os, SeqIO
+from script.settings import os, SeqIO
 
 class ORF(object):
 	def __init__(self,input_file, clean=True, working_directory=None, low_quality=False):

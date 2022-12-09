@@ -5,7 +5,7 @@ import os
 from Bio import SeqIO
 import json
 from abc import ABCMeta, abstractmethod
-from settings import logger
+from script.settings import logger
 #from Bio.Alphabet import generic_dna
 from Bio.Seq import Seq
 from pyfaidx import Fasta
