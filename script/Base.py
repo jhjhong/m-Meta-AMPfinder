@@ -5,7 +5,7 @@ import os
 from Bio import SeqIO
 import json
 from abc import ABCMeta, abstractmethod
-from settings import logger
+from script.settings import logger
 #from Bio.Alphabet import generic_dna
 from Bio.Seq import Seq
 from pyfaidx import Fasta
@@ -162,10 +162,10 @@ class BaseModel(object):
 
         return predicted_genes_dict
 
-    def results(self, blast_results, query_id, perfect, strict, loose, exclude_nudge=True):
+    def results(self, blast_results, query_id, perfect, strict, loose, include_nudge=False):
         nudged = False
         if len(perfect) == 0 and len(strict) == 0 and len(loose) > 0:
-            if exclude_nudge is True:
+            if include_nudge is True:
                 nudged, loose = self.nudge_loose_to_strict(loose)
 
             if nudged is True and self.loose is False:
@@ -190,8 +190,7 @@ class BaseModel(object):
     def nudge_strict_to_perfect(self, strict):
         nudged = False
         for s in strict:
-            if int(strict[s]["perc_identity"]) == 100 and strict[s]["type_match"] == "Strict" and strict[s][
-                "model_type_id"] in [40292] and self.input_type == 'contig':
+            if int(strict[s]["perc_identity"]) == 100 and strict[s]["type_match"] == "Strict" and strict[s]["model_type_id"] in [40292] and self.input_type == 'contig':
                 reference = strict[s]["sequence_from_broadstreet"]
                 query = strict[s]["orf_prot_sequence"]
                 orf_dna_sequence_ = ""
@@ -251,11 +250,9 @@ class BaseModel(object):
 
                             if strict[s]["orf_strand"] == "-":
                                 strict[s]["orf_start_possible"] = strict[s]["orf_start"]
-                                strict[s]["orf_end_possible"] = int(strict[s]["orf_start"]) + len(
-                                    strict[s]["dna_sequence_from_broadstreet"]) - 1
+                                strict[s]["orf_end_possible"] = int(strict[s]["orf_start"]) + len(strict[s]["dna_sequence_from_broadstreet"]) - 1
                             else:
-                                strict[s]["orf_start_possible"] = int(strict[s]["orf_end"]) - len(
-                                    strict[s]["dna_sequence_from_broadstreet"]) + 1
+                                strict[s]["orf_start_possible"] = int(strict[s]["orf_end"]) - len(strict[s]["dna_sequence_from_broadstreet"]) + 1
                                 strict[s]["orf_end_possible"] = int(strict[s]["orf_end"])
 
                             # pull nucleotides from query or submitted sequence
@@ -267,31 +264,31 @@ class BaseModel(object):
                             )
 
                             if strict[s]["orf_strand"] == "-":
-                                strict[s]["orf_dna_sequence_possible"] = str(
-                                    Seq(partial_bases).reverse_complement())
+                                strict[s]["orf_dna_sequence_possible"] = str(Seq(partial_bases).reverse_complement())
                             else:
                                 strict[s]["orf_dna_sequence_possible"] = partial_bases
 
                             if len(strict[s]["orf_dna_sequence_possible"]) % 3 == 0:
-                                orf_prot_sequence_possible = str(
-                                    Seq(strict[s]["orf_dna_sequence_possible"]).translate(table=11)).strip(
-                                    "*")
+                                orf_prot_sequence_possible = str(Seq(strict[s]["orf_dna_sequence_possible"]).translate(table=11)).strip("*")
                                 strict[s]["orf_prot_sequence_possible"] = orf_prot_sequence_possible
                                 if orf_prot_sequence_possible == strict[s]["sequence_from_broadstreet"]:
                                     strict[s]["type_match"] = "Perfect"
                                     nudged = True
                             else:
-                                logger.warning(
-                                    "incorrect open reading frame for coordinate: {}-{} on strand {} for {}".format
-                                    (strict[s]["orf_start_possible"], strict[s]["orf_end_possible"],
-                                     strict[s]["orf_strand"], strict[s]["orf_from"]))
+                                logger.warning("incorrect open reading frame for coordinate: {}-{} on strand {} for {}".format(strict[s]["orf_start_possible"], strict[s]["orf_end_possible"], strict[s]["orf_strand"], strict[s]["orf_from"]))
 
                             strict[s]["nudged"] = nudged
 
                         else:
-                            pass
+                            logger.warning("partial gene in card reference: {}, start_codon: {},  stop_codon: {}".format(
+                                strict[s]["ARO_name"],
+                                start_codon,
+                                stop_codon
+                            ))
                     else:
-                        pass
+                        logger.warning("partial gene in card reference: {}".format(
+                            strict[s]["ARO_name"]
+                        ))
             elif 95 <= int(strict[s]["perc_identity"]) < 100 and strict[s]["type_match"] == "Strict" and strict[s][
                 "model_type_id"] in [40292] and self.input_type == 'contig':
                 pass
@@ -299,6 +296,23 @@ class BaseModel(object):
         return nudged, strict
 
     def get_part_sequence(self, fasta_file, header, start, stop, nterminus, strand, name):
+        """
+        Pull part sequence from fasta file
+        # https://github.com/mdshw5/pyfaidx
+        # pip install pyfaidx
+        Parameters
+        ----------
+        Args:
+            fasta_file (str): input fasta file
+            header (str): header for fasta sequence
+            start (str): start coordinate
+            stop (str): stop coordinate
+            nterminus (int): length of missing sequence
+            strand (str): strand
+            name (str): gene name
+        Returns:
+            sequence (str): portion on a sequence
+        """
         header = header[:header.rfind("_")]
         genes = False
         try:

@@ -2,8 +2,8 @@ import argparse
 import json
 import os
 import re
-from Base import *
-from settings import *
+from script.Base import *
+from script.settings import *
 
 
 class Database():

@@ -1,13 +1,13 @@
 import filetype
 import os
 import time
-from Database import Database
-from ORF import ORF
-from Blast import Blast
-from Diamond import Diamond
-from settings import *
+from script.Database import Database
+from script.ORF import ORF
+from script.Blast import Blast
+from script.Diamond import Diamond
+from script.settings import *
 from Bio import SeqIO
-from Base import*
+from script.Base import*
 
 
 class AMP(AMPBase):

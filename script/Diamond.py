@@ -1,4 +1,4 @@
-from settings import *
+from script.settings import *
 
 class Diamond(object):
 	def __init__(self,input_file, output_file=None, program = 'blastp', num_threads=32):
