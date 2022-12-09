@@ -5,8 +5,8 @@ import os
 from Bio import SeqIO
 import json
 from abc import ABCMeta, abstractmethod
-from script.settings import logger
-from Bio.Alphabet import generic_dna
+from settings import logger
+#from Bio.Alphabet import generic_dna
 from Bio.Seq import Seq
 from pyfaidx import Fasta
 
@@ -213,15 +213,13 @@ class BaseModel(object):
                         if strict[s]["orf_strand"] == "-":
                             strict[s]["orf_end_possible"] = orf_end_ + 1
                             strict[s]["orf_start_possible"] = strict[s]["orf_start"]
-                            orf_dna_sequence_ = str(Seq(partial_bases, generic_dna).reverse_complement()) + strict[s][
-                                "orf_dna_sequence"]
-                            partial_protein = str(
-                                Seq(partial_bases, generic_dna).reverse_complement().translate(table=11))
+                            orf_dna_sequence_ = str(Seq(partial_bases).reverse_complement()) + strict[s]["orf_dna_sequence"]
+                            partial_protein = str(Seq(partial_bases).reverse_complement().translate(table=11))
                         else:
                             strict[s]["orf_start_possible"] = orf_start_
                             strict[s]["orf_end_possible"] = int(strict[s]["orf_end"]) + 1
                             orf_dna_sequence_ = partial_bases + strict[s]["orf_dna_sequence"]
-                            partial_protein = str(Seq(partial_bases, generic_dna).translate(table=11)).strip("*")
+                            partial_protein = str(Seq(partial_bases).translate(table=11)).strip("*")
                         if len(partial_protein) > 0:
                             _partial_protein = partial_protein[0]
                             if partial_protein[0] in ["L", "M", "I", "V"]:
@@ -270,13 +268,13 @@ class BaseModel(object):
 
                             if strict[s]["orf_strand"] == "-":
                                 strict[s]["orf_dna_sequence_possible"] = str(
-                                    Seq(partial_bases, generic_dna).reverse_complement())
+                                    Seq(partial_bases).reverse_complement())
                             else:
                                 strict[s]["orf_dna_sequence_possible"] = partial_bases
 
                             if len(strict[s]["orf_dna_sequence_possible"]) % 3 == 0:
                                 orf_prot_sequence_possible = str(
-                                    Seq(strict[s]["orf_dna_sequence_possible"], generic_dna).translate(table=11)).strip(
+                                    Seq(strict[s]["orf_dna_sequence_possible"]).translate(table=11)).strip(
                                     "*")
                                 strict[s]["orf_prot_sequence_possible"] = orf_prot_sequence_possible
                                 if orf_prot_sequence_possible == strict[s]["sequence_from_broadstreet"]:

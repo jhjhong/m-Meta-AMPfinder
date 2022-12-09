@@ -7,6 +7,7 @@
 node_modules/
 dist/
 __pycache__/
+.vscode/
 
 # Compiled Java class files
 *.class
@@ -16,6 +17,12 @@ __pycache__/
 
 # Rar fasta files
 *.fasta
+
+# Database files
+protein_all.*
+
+# Example files
+example*
 
 # Log files
 *.log
