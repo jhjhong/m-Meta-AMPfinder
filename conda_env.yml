@@ -1,4 +1,4 @@
-name: meta-acpfinder
+name: macpfinder
 channels:
   - conda-forge
   - bioconda

@@ -23,13 +23,11 @@ The following dependencies are required.
 
 ### Install AMPfinder
 
-`git clone https://github.com/BiOmicsLab/AMPfinder.git`
+We have already integrate the environment in `conda_env.yaml`. execute `conda env create --file conda_env.yaml` to install packages required in a new created `AVPIden` conda env.
 
-`cd AMPfinder`
+Enter the enviornment with `conda activate macpfinder` before further executions.
 
-`python AMPfinder main -h`
-
-**Note**: Please ensure that all dependencies are installed before using AMPfinder
+**Note**: Please ensure that all dependencies are installed before using mACPfinder
 
 ### Usage
 #### Construct Database
