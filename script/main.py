@@ -1,62 +1,77 @@
 
 from script.settings import *
+import script.load
+import script.makedatabase
 from script.AMP import*
 from progress.bar import Bar
 import argparse
 
 class Main(object):
-    def __init__(self, api=False):
-        # """
+    def __init__(self):
         self.cpu_count = os.cpu_count()
         USAGE='''%(prog)s <command> [<args>]
+
             commands are:
-               ---------------------------------------------------------------------------------------
-               Database
-               ---------------------------------------------------------------------------------------
-               auto_load Automatically loads CARD database, annotations and k-mer database
-               load      Loads CARD database, annotations and k-mer database
-               clean     Removes BLAST databases and temporary files
-               database  Information on installed card database
-               galaxy    Galaxy project wrapper
-               ---------------------------------------------------------------------------------------
-               Genomic
-               ---------------------------------------------------------------------------------------
-               main     Runs rgi application
-               tab      Creates a Tab-delimited from rgi results
-               parser   Creates categorical JSON files RGI wheel visualization
-               heatmap  Heatmap for multiple analysis
-               ---------------------------------------------------------------------------------------
-               Metagenomic
-               ---------------------------------------------------------------------------------------
-               bwt                   Align reads to CARD and in silico predicted allelic variants (beta)
-               ---------------------------------------------------------------------------------------
-               Baits validation
-               ---------------------------------------------------------------------------------------
-               tm                    Baits Melting Temperature
-               ---------------------------------------------------------------------------------------
-               Annotations
-               ---------------------------------------------------------------------------------------
-               card_annotation       Create fasta files with annotations from card.json
-               wildcard_annotation   Create fasta files with annotations from variants
-               baits_annotation      Create fasta files with annotations from baits (experimental)
-               remove_duplicates     Removes duplicate sequences (experimental)
-               ---------------------------------------------------------------------------------------
-               Pathogen of origin
-               ---------------------------------------------------------------------------------------
-               kmer_build            Build AMR specific k-mers database used for pathogen of origin (beta)
-               kmer_query            Query sequences against AMR k-mers database to predict pathogen of origin (beta)
+
+                Database:
+                ---------------------------------------------------------------------------------------
+                auto_load Automatically loads blast database, and installed mACPfinder databases
+                load      Loads mACPfinder database
+                database  Information on installed mACPfinder database
+                clean     Removes current databases and temporary files
+
+                
+                m(Meta)ACPfinder:
+                ---------------------------------------------------------------------------------------
+                main     Runs mACPfinder application
+
+            Examples:
+            
+                parse blast database:
+                macpfinder load --input_json ampfinder_210729.json
+
+                install blast/diamond database:
+                macpfinder database
+
+                run Macrel on peptides:  
+                macrel peptides --fasta example_seqs/expep.faa.gz --output out_peptides
+                
+                run Macrel on contigs:
+                macrel contigs --fasta example_seqs/excontigs.fna.gz --output out_contigs
+                
+                run Macrel on paired-end reads:
+                macrel reads -1 example_seqs/R1.fq.gz -2 example_seqs/R2.fq.gz --output out_metag --outtag example_metag
+                
+                run Macrel to get abundance profiles: 
+                macrel abundance -1 example_seqs/R1.fq.gz --fasta example_seqs/ref.faa.gz --output out_abundance --outtag example_abundance
+
+                removes databases and temporary files:
+                macpfinder clean
+                
+                For more information,please read the docs: https://macrel.readthedocs.io/en/latest/
                '''
 
-        parser = argparse.ArgumentParser(prog="acpfinder", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION), epilog=SOFTWARE_SUMMARY, usage=USAGE)
-        parser.add_argument('command', choices=['main', 'tab', 'parser', 'load', 'auto_load'], help='Subcommand to run')
+        parser = argparse.ArgumentParser(prog="macpfinder", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION), epilog=SOFTWARE_SUMMARY, usage=USAGE)
+        parser.add_argument('command', choices=['main', 'load', 'auto_load', 'database', 'clean'], help='Subcommand to run')
 
-        if api == False:
-            args=parser.parse_args(sys.argv[1:2])
-            if not hasattr(self, args.command):
-                logger.info("Unrecognized command: {}".format(args.command))
-                exit("Error: Unrecognized command: {}".format(args.command))
-            getattr(self, args.command)()
+        args=parser.parse_args(sys.argv[1:2])
+        if not hasattr(self, args.command):
+            logger.info("Unrecognized command: {}".format(args.command))
+            exit("Error: Unrecognized command: {}".format(args.command))
+        getattr(self, args.command)()
 
+    def load(self):
+        parser = self.load_args()
+        args = parser.parse_args(sys.argv[2:])
+        self.load_run(args)
+
+    def load_args(self):
+        parser = script.load.create_parser()
+        return parser
+
+    def load_run(self, args):
+        script.load.main(args)
+"""
     def main(self):
         parser = self.main_args()
         args = parser.parse_args(sys.argv[2:])
@@ -92,6 +107,7 @@ class Main(object):
     def main_run(self, args):
         amp_obj = AMP(**vars(args))
         amp_obj.run()
+"""
 
 if __name__ == '__main__':
     m = MainBase()
