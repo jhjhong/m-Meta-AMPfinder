@@ -1,10 +1,12 @@
 import shutil
 import argparse
 from script.settings import *
+from script.Database import *
 
 def write_fasta_from_json(input_json):
 	# Creates a fasta file from json file.
 	if os.path.isfile(os.path.join(data_path, "proteindb.fsa")):
+		print("Database already exists at {}".format(data_path))
 		logger.info("Database already exists.")
 		return
 	else:
@@ -34,6 +36,7 @@ def main(args):
 		logger.setLevel(10)
 
 	write_fasta_from_json(args.input_json)
+	Database()
 
 
 def create_parser():

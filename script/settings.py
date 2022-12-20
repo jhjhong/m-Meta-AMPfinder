@@ -18,9 +18,6 @@ def determine_path():
 
 script_path = determine_path()
 db_path = os.path.join(script_path, "db/")
-if not os.path.exists(db_path):
-    print("making database folder here!")
-    os.system('mkdir ' + db_path)
 
 path = os.path.join(db_path, "_db/")
 data_path = os.path.join(db_path, "_data/")

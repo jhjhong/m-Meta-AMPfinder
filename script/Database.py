@@ -7,54 +7,37 @@ from script.settings import *
 
 
 class Database():
-    def __init__(self,args):
-        self.db = PATH
-        self.args = args
+    def __init__(self):
+        self.build_databases()
         self.stdout = "2>&1 >> /dev/null"  # "2> /dev/null"
 
-    def __repr__(self):
-        return "Database({}".format(self.__dict__)
-
-    def run(self):
-        self.build_databases()
-
     def build_databases(self):
-        self.write_fasta_from_json()
+        # self.write_fasta_from_json()
         self.make_blast_database()
         self.make_diamond_database()
 
-    def write_fasta_from_json(self):
-        working_directory = os.getcwd()
-        with open(os.path.join(working_directory, self.args.input_database), 'r') as jfile:
-            data = json.load(jfile)
-            with open(os.path.join(working_directory, "database.fasta"), 'a') as fout:
-                for i in range(0, len(data)):
-                    header = (data[i]['dbAMP_ID'])
-                    sequence = data[i]['Seq']
-                    fout.write(">{}\n".format(header))
-                    fout.write("{}\n".format(sequence))
-
 
     def make_blast_database(self):
-        if os.path.isfile(os.path.join(self.db, "database.fasta")) == True and os.path.exists(
-                os.path.join(self.db, "proteindb_all.fsa")) == True \
-                and os.path.exists(os.path.join(self.db, "protein_all.db.phr")) == True and os.path.exists(
-            os.path.join(self.db, "protein_all.db.pin")) == True \
-                and os.path.exists(os.path.join(self.db, "protein_all.db.psq")) == True:
+        # Build BLAST database from a FASTA file.
+        if os.path.isfile(os.path.join(data_path, "proteindb.fsa")) == True \
+            and os.path.exists(os.path.join(path, "proteindb_all.fsa")) == True \
+            and os.path.exists(os.path.join(path, "protein_all.db.phr")) == True \
+            and os.path.exists(os.path.join(path, "protein_all.db.pin")) == True \
+            and os.path.exists(os.path.join(path, "protein_all.db.psq")) == True:
+            logger.info("blast DB exists")
             pass
         else:
-            os.system('makeblastdb -in {} -dbtype prot -out {} '.format(os.path.join(self.db, "database.fasta"),
-                                                                                os.path.join(self.db, "protein_all.db"),
-                                                                                ))
+            logger.info("create blast DB.")
+            os.system('makeblastdb -in {} -dbtype prot -out {} {stdout}'.format(os.path.join(data_path, "proteindb.fsa"), os.path.join(path, "protein_all.db"),stdout=self.stdout))
 
 
     def make_diamond_database(self):
-        if os.path.isfile(os.path.join(self.db, "proteindb_all.fsa")) == True and os.path.exists(
-                os.path.join(self.db, "proteindb_all.fsa")) == True \
-                and os.path.exists(os.path.join(self.db, "protein_all.db.dmnd")) == True:
+        # Build DIAMOND database from a FASTA file.
+        if os.path.isfile(os.path.join(path, "proteindb_all.fsa")) == True \
+            and os.path.exists(os.path.join(path, "proteindb_all.fsa")) == True \
+            and os.path.exists(os.path.join(path, "protein_all.db.dmnd")) == True:
             logger.info("diamond DB exists")
             pass
         else:
-            os.system('diamond makedb --quiet --in {} --db {}'.format(os.path.join(self.db, "database.fasta"),
-                                                                               os.path.join(self.db, "protein_all.db"),
-                                                                               ))
+            logger.info("create diamond DB.")
+            os.system('diamond makedb --quiet --in {} --db {} {stdout}'.format(os.path.join(self.db, "proteindb.fsa"),os.path.join(self.db, "protein_all.db"),stdout=self.stdout))
