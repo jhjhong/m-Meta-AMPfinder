@@ -28,6 +28,7 @@ data_path = os.path.join(db_path, "_data/")
 # ====================================================================================
 # LOGGING CONFIG
 # ====================================================================================
+# https://editor.leonh.space/2022/python-log/ logging 找時間回來改
 level = logging.WARNING
 logger = logging.getLogger(__name__)
 logger.setLevel(level)
