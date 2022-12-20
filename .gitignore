@@ -20,10 +20,10 @@ db
 *.fasta
 
 # Database files
-protein_all.*
+# protein.db.*
 
 # Example files
-example*
+# example*
 
 # Log files
 *.log
