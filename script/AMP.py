@@ -11,25 +11,49 @@ from script.Base import*
 
 
 class AMP(AMPBase):
-    def __init__(self, input_type='contig', input_sequence=None , threads=32, output_file=None, data='na', aligner='blast'):
-        o_f_path, o_f_name = os.path.split(os.path.abspath(output_file))
+    def __init__(self, input_type='contig', short1=None, short2=None, input_sequence=None , threads=32, output_dir=None, data='na', aligner='blast', debug=False):
+        # o_f_path, o_f_name = os.path.split(os.path.abspath(output_file))
 
+        # Change some arguments to full paths.
+        # self.output_file = os.path.abspath(output_file)
+        if short1:
+            self.short1 = os.path.abspath(short1)
+        if short2:
+            self.short2 = os.path.abspath(short2)
+        if input_sequence:
+            self.input_sequence = os.path.abspath(input_sequence)
+        self.output_file = os.path.abspath(output_dir)
         self.input_type = input_type.lower()
-        self.input_sequence = os.path.abspath(input_sequence)
         self.threads = threads
-        self.output_file = os.path.abspath(output_file)
-        self.data = data
-        self.aligner = aligner.lower()
 
+        self.aligner = aligner.lower()
+        self.debug = debug
+        if self.debug:
+	        logger.setLevel(10)
+        
+        # database folder
         self.db = path
         self.dp = data_path
-
-        self.working_directory = o_f_path
-
+        
+        # self.working_directory = o_f_path
         super(AMPBase, self).__init__()
+    
+    def make_output_directory(self):
+        # Creates the output directory, if it doesn't already exist.
+        if not os.path.exists(self.output_file):
+            try:
+                os.makedirs(self.output_file)
+            except OSError:
+                logger.error("mACPfinder was unable to make the output directory")
+                exit()
+            logger.info("Making output directory: {}".format(self.output_file))
+        elif os.listdir(self.output_file):
+            logger.info("The output directory already exists and files may be reused or overwritten: {}".format(self.output_file))
+        else:  # directory exists but is empty
+            logger.info("The output directory already exists: {}".format(self.output_file))
 
     def validate_inputs(self):
-
+        print(self.input_sequence)
         if not os.path.exists(self.input_sequence):
             logger.error("input file does not exist: {}".format(self.input_sequence))
             exit()
@@ -129,9 +153,11 @@ class AMP(AMPBase):
 
 
     def run(self):
-
+        # print("TEST1")
+        # print(self.output_file)
+        self.make_output_directory()
         self.validate_inputs()
-        self.run_blast()
+        # self.run_blast()
 
     def run_blast(self):
         """Runs blast."""
@@ -141,6 +167,30 @@ class AMP(AMPBase):
             self.process_contig()
         else:
             exit()
+
+    def process_metagenomics(self):
+        """Process metagenomics short reads."""
+        short1 = os.path.basename(self.short1)
+        short2 = os.path.basename(self.short2)
+        print("HERE")
+        output = self.output_file
+        orf_obj = ORF(input_file=self.input_sequence)
+        orf_obj.contig_to_orf()
+        contig_fsa_file = os.path.join(self.working_directory, "{}.temp.contig.fsa".format(file_name))
+        try:
+            if os.stat(contig_fsa_file).st_size > 0:
+                if self.aligner == "diamond":
+                    diamond_obj = Diamond(input_file=contig_fsa_file, output_file = output,num_threads=self.threads)
+                    diamond_obj.run()
+                else:
+                    blast_obj = Blast(input_file=contig_fsa_file, output_file = output, num_threads=self.threads)
+                    blast_obj.run()
+            else:
+                self.write_stub_output_file()
+        except Exception as e:
+            logger.exception("failed to write orf file")
+        else:
+            pass
 
 
     def process_protein(self):
