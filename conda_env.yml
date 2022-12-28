@@ -17,3 +17,4 @@ dependencies:
   - blast 2.9.0
   - pyrodigal >= 2.0.0
   - diamond 0.8.36
+  - fastp >=0.23.0
