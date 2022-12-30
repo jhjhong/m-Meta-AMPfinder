@@ -14,22 +14,22 @@ import bz2
 
 
 class AMP(AMPBase):
-    def __init__(self, input_type='contig', short1=None, short2=None, input_sequence=None , threads=32, output_dir=None, data='na', aligner='blast', debug=False):
-        # o_f_path, o_f_name = os.path.split(os.path.abspath(output_file))
-
+    def __init__(self, input_type='', short1=None, short2=None, input_sequence=None , threads=32, output_dir=None, data='na', aligner='blast', debug=False):
         # Change some arguments to full paths.
-        # self.output_file = os.path.abspath(output_file)
         if short1:
             self.short1 = os.path.abspath(short1)
         if short2:
             self.short2 = os.path.abspath(short2)
+        else:
+            self.short2 = None
         if input_sequence:
             self.input_sequence = os.path.abspath(input_sequence)
-        self.output_dir = os.path.abspath(output_dir)
+
         self.input_type = input_type.lower()
         self.threads = threads
-
+        self.output_dir = os.path.abspath(output_dir)
         self.aligner = aligner.lower()
+
         self.debug = debug
         if self.debug:
 	        logger.setLevel(10)
@@ -37,8 +37,7 @@ class AMP(AMPBase):
         # database folder
         self.db = path
         self.dp = data_path
-        
-        # self.working_directory = o_f_path
+
         super(AMPBase, self).__init__()
     
     def make_output_directory(self):
@@ -56,55 +55,50 @@ class AMP(AMPBase):
             logger.info("The output directory already exists: {}".format(self.output_dir))
 
     def validate_inputs(self):
-        # print(self.input_sequence)
+        # Checks that args are consistent
+        #    - validate input file name and out file name
+		# 	 - validation for mutually exclusive options e.g. protein sequence for contig input_type etc
+        # Exits with an error message if not the case
         if self.input_type == "reads":
-            if not self.short1 or not self.short2:
+            if not self.short1:
+                if not self.input_sequence:
+                    logger.error("FQ file is necessary for 'reads' command.")
+                    exit()
+                else:
+                    self.short1 = self.input_sequence
+            if not os.path.exists(self.short1):
+                logger.error("input file does not exist: {}".format(self.short1))
+                exit()
+            else:
+                logger.info("Input short1: {} => {}".format(self.short1, filetype.guess(self.short1)))
+                if self.check_filetype(self.short1) == False:
+                    logger.error("invalid input file format")
+                    exit()
+                if self.short2:
+                    if not os.path.exists(self.short2):
+                        logger.error("input file does not exist: {}".format(self.short2))
+                        exit()
+                    elif self.short1 and self.short2 and self.short1 == self.short2:
+                        logger.error("first and second read pair files cannot be the same file")
+                        exit()
+
+                    logger.info("Input short2: {} => {}".format(self.short2, filetype.guess(self.short2)))
+                    if self.check_filetype(self.short2) == False:
+                        logger.error("invalid input file format")
+                        exit()
+                else:
+                    logger.info("Input short2: {}".format(self.short2))
+                print("HE")
+        
+        elif self.input_type in ["contigs", "peptides"]:
+            if not self.input_sequence:
+                logger.error("FASTA File is necessary for 'contigs/peptides' command.")
+            if not os.path.exists(self.input_sequence):
                 logger.error("input file does not exist: {}".format(self.input_sequence))
                 exit()
-        # elif self.input_type == "contigs":
-
-        
-        
-        # if not os.path.exists(self.input_sequence):
-        #     logger.error("input file does not exist: {}".format(self.input_sequence))
-        #     exit()
-
-        # if self.output_file == self.input_sequence and self.clean:
-        #     logger.error("output path same as input, must specify "
-        #                  "different path when cleaning to prevent "
-        #                  "accidental deletion of input files")
-        #     exit()
-
-        # logger.info("{} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
-        kind = filetype.guess(self.input_sequence)
-        if kind is None:
-            if self.is_fasta() == False:
-                logger.error("invalid fasta")
-                exit()
-            elif self.is_dna() == False:
-                logger.error("invalid fastq")
-                exit()
-        else:
-            if kind.extension in ["gz","bz2"]:
-                if self.is_fasta(kind.extension) == False:
-                    logger.error("invalid fasta")
-                    exit()
-                # uncompressed input and use uncompressed file
-                filename = os.path.basename(self.input_sequence)
-                umcompressed_file = os.path.join(self.working_directory, "{}.temp.uncompressed.fsa".format(filename))
-                with open(umcompressed_file, "w") as file_out:
-                    if kind.extension == "gz":
-                        with gzip.open(self.input_sequence, "rt") as handle:
-                            file_out.write(handle.read())
-                    else:
-                        with bz2.open(self.input_sequence, "rt") as handle:
-                            file_out.write(handle.read())
-
-                self.input_sequence = umcompressed_file
-                self.umcompressed_file = umcompressed_file
             else:
-                logger.error("Sorry, no support for file format {}".format(kind.mime))
-                exit()
+                logger.info("{} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
+
 
         if self.threads > os.cpu_count():
             logger.error(
@@ -112,19 +106,49 @@ class AMP(AMPBase):
                                                                                                    self.threads))
             exit()
 
-    def is_fasta(self, extension=""):
-        if extension == "":
-            with open(self.input_sequence, "r") as handle:
+    def check_filetype(self, file):
+        kind = filetype.guess(file)
+        if kind is None:
+            if self.is_fasta(file) == False:
+                logger.error("invalid fasta")
+                exit()
+            else:
+                return True
+        # else:
+        #     if kind.extension in ["gz","bz2"]:
+        #         if self.is_fasta(kind.extension) == False:
+        #             logger.error("invalid fasta")
+        #             exit()
+        #         # uncompressed input and use uncompressed file
+        #         filename = os.path.basename(self.input_sequence)
+        #         umcompressed_file = os.path.join(self.output_dir, "{}.temp.uncompressed.fsa".format(filename))
+        #         with open(umcompressed_file, "w") as file_out:
+        #             if kind.extension == "gz":
+        #                 with gzip.open(self.input_sequence, "rt") as handle:
+        #                     file_out.write(handle.read())
+        #             else:
+        #                 with bz2.open(self.input_sequence, "rt") as handle:
+        #                     file_out.write(handle.read())
+
+        #         self.input_sequence = umcompressed_file
+        #         self.umcompressed_file = umcompressed_file
+        #     else:
+        #         logger.error("Sorry, no support for file format {}".format(kind.mime))
+        #         exit()
+
+    def is_fasta(self, file, extension=None):
+        if extension is None:
+            with open(file, "r") as handle:
                 fasta = SeqIO.parse(handle, "fasta")
                 self.check_record(fasta)
                 return True
         elif extension in ["gz", "bz2"]:
             if extension == "gz":
-                with gzip.open(self.input_sequence, "rt") as handle:
+                with gzip.open(file, "rt") as handle:
                     fasta = SeqIO.parse(handle, "fasta")
                     self.check_record(fasta)
             else:
-                with bz2.open(self.input_sequence, "rt") as handle:
+                with bz2.open(file, "rt") as handle:
                     fasta = SeqIO.parse(handle, "fasta")
                     self.check_record(fasta)
             return True
@@ -142,7 +166,7 @@ class AMP(AMPBase):
                 return self.is_protein(record.seq)
     
     # @staticmethod
-    def is_dna(sequence):
+    def is_dna(self, sequence):
         #  dna codes
         nucleotide_dict = {'A': 0, 'T': 0, 'G': 0, 'C': 0, 'N': 0, 'U': 0,
                            #  other dna codes
@@ -165,10 +189,11 @@ class AMP(AMPBase):
                 logger.error("invalid nucleotide fasta due to: {}".format(e))
                 return False
         logger.info("valid nucleotide fasta: {}".format(nucleotide_dict))
+        print("dna")
         return True
 
     @staticmethod
-    def is_protein(sequence):
+    def is_protein(self, sequence):
         amino_acids_dict = {
             # common symbols between protein and dna codes
             'A': 0, 'T': 0, 'G': 0, 'C': 0, 'N': 0, 'U': 0,
