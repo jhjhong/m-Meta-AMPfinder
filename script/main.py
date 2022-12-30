@@ -1,7 +1,7 @@
-
 from script.settings import *
-import script.load
+from script.load import *
 from script.AMP import*
+
 from progress.bar import Bar
 import argparse
 

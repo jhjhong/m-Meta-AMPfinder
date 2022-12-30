@@ -1,13 +1,16 @@
-import filetype
-import os
-import time
 from script.Database import Database
 from script.ORF import ORF
 from script.Blast import Blast
 from script.Diamond import Diamond
 from script.settings import *
-from Bio import SeqIO
 from script.Base import*
+
+from Bio import SeqIO
+import filetype
+import os
+import time
+import gzip, zlib
+import bz2
 
 
 class AMP(AMPBase):
@@ -22,7 +25,7 @@ class AMP(AMPBase):
             self.short2 = os.path.abspath(short2)
         if input_sequence:
             self.input_sequence = os.path.abspath(input_sequence)
-        self.output_file = os.path.abspath(output_dir)
+        self.output_dir = os.path.abspath(output_dir)
         self.input_type = input_type.lower()
         self.threads = threads
 
@@ -40,63 +43,105 @@ class AMP(AMPBase):
     
     def make_output_directory(self):
         # Creates the output directory, if it doesn't already exist.
-        if not os.path.exists(self.output_file):
+        if not os.path.exists(self.output_dir):
             try:
-                os.makedirs(self.output_file)
+                os.makedirs(self.output_dir)
             except OSError:
                 logger.error("mACPfinder was unable to make the output directory")
                 exit()
-            logger.info("Making output directory: {}".format(self.output_file))
-        elif os.listdir(self.output_file):
-            logger.info("The output directory already exists and files may be reused or overwritten: {}".format(self.output_file))
+            logger.info("Making output directory: {}".format(self.output_dir))
+        elif os.listdir(self.output_dir):
+            logger.info("The output directory already exists and files may be reused or overwritten: {}".format(self.output_dir))
         else:  # directory exists but is empty
-            logger.info("The output directory already exists: {}".format(self.output_file))
+            logger.info("The output directory already exists: {}".format(self.output_dir))
 
     def validate_inputs(self):
-        print(self.input_sequence)
-        if not os.path.exists(self.input_sequence):
-            logger.error("input file does not exist: {}".format(self.input_sequence))
-            exit()
+        # print(self.input_sequence)
+        if self.input_type == "reads":
+            if not self.short1 or not self.short2:
+                logger.error("input file does not exist: {}".format(self.input_sequence))
+                exit()
+        # elif self.input_type == "contigs":
 
-        if self.output_file == self.input_sequence and self.clean:
-            logger.error("output path same as input, must specify "
-                         "different path when cleaning to prevent "
-                         "accidental deletion of input files")
-            exit()
+        
+        
+        # if not os.path.exists(self.input_sequence):
+        #     logger.error("input file does not exist: {}".format(self.input_sequence))
+        #     exit()
 
-        logger.info("{} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
+        # if self.output_file == self.input_sequence and self.clean:
+        #     logger.error("output path same as input, must specify "
+        #                  "different path when cleaning to prevent "
+        #                  "accidental deletion of input files")
+        #     exit()
+
+        # logger.info("{} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
         kind = filetype.guess(self.input_sequence)
-
         if kind is None:
             if self.is_fasta() == False:
                 logger.error("invalid fasta")
                 exit()
+            elif self.is_dna() == False:
+                logger.error("invalid fastq")
+                exit()
         else:
-            logger.error(kind.extension)
-            logger.error(kind.mime)
-            logger.warning("Sorry, no support for this format.")
-            exit()
+            if kind.extension in ["gz","bz2"]:
+                if self.is_fasta(kind.extension) == False:
+                    logger.error("invalid fasta")
+                    exit()
+                # uncompressed input and use uncompressed file
+                filename = os.path.basename(self.input_sequence)
+                umcompressed_file = os.path.join(self.working_directory, "{}.temp.uncompressed.fsa".format(filename))
+                with open(umcompressed_file, "w") as file_out:
+                    if kind.extension == "gz":
+                        with gzip.open(self.input_sequence, "rt") as handle:
+                            file_out.write(handle.read())
+                    else:
+                        with bz2.open(self.input_sequence, "rt") as handle:
+                            file_out.write(handle.read())
+
+                self.input_sequence = umcompressed_file
+                self.umcompressed_file = umcompressed_file
+            else:
+                logger.error("Sorry, no support for file format {}".format(kind.mime))
+                exit()
+
         if self.threads > os.cpu_count():
             logger.error(
                 "Argument num_threads illegal value, expected (>=1 and =<{}):  given `{}`)".format(os.cpu_count(),
                                                                                                    self.threads))
             exit()
 
-    def is_fasta(self):
-        """Checks for valid fasta format."""
-        with open(self.input_sequence, "r") as handle:
-            fasta = SeqIO.parse(handle, "fasta")
-            # check each record in the file
-            for record in fasta:
-                if any(record.id) == False or any(record.seq) == False:
-                    return False
-                if self.input_type == "contig":
-                    return self.is_dna(record.seq)
-                if self.input_type == "protein":
-                    return self.is_protein(record.seq)
+    def is_fasta(self, extension=""):
+        if extension == "":
+            with open(self.input_sequence, "r") as handle:
+                fasta = SeqIO.parse(handle, "fasta")
+                self.check_record(fasta)
+                return True
+        elif extension in ["gz", "bz2"]:
+            if extension == "gz":
+                with gzip.open(self.input_sequence, "rt") as handle:
+                    fasta = SeqIO.parse(handle, "fasta")
+                    self.check_record(fasta)
+            else:
+                with bz2.open(self.input_sequence, "rt") as handle:
+                    fasta = SeqIO.parse(handle, "fasta")
+                    self.check_record(fasta)
             return True
+        else:
+            return False
 
-    @staticmethod
+    def check_record(self, fasta):
+        # check each record in the file
+        for record in fasta:
+            if any(record.id) == False or any(record.seq) == False:
+                return False
+            if self.input_type == "contig":
+                return self.is_dna(record.seq)
+            if self.input_type == "protein":
+                return self.is_protein(record.seq)
+    
+    # @staticmethod
     def is_dna(sequence):
         #  dna codes
         nucleotide_dict = {'A': 0, 'T': 0, 'G': 0, 'C': 0, 'N': 0, 'U': 0,
