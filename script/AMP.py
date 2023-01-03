@@ -70,10 +70,13 @@ class AMP(AMPBase):
                 logger.error("input file does not exist: {}".format(self.short1))
                 exit()
             else:
+                # assign umcompressed short1 
                 logger.info("Input short1: {} => {}".format(self.short1, filetype.guess(self.short1)))
-                if self.check_filetype(self.short1) == False:
-                    logger.error("invalid input file format")
-                    exit()
+                if self.check_filetype(self.short1) == None:
+                    pass
+                else:
+                    self.short1 = self.check_filetype(self.short1)
+
                 if self.short2:
                     if not os.path.exists(self.short2):
                         logger.error("input file does not exist: {}".format(self.short2))
@@ -81,15 +84,15 @@ class AMP(AMPBase):
                     elif self.short1 and self.short2 and self.short1 == self.short2:
                         logger.error("first and second read pair files cannot be the same file")
                         exit()
-
+                    # assign umcompressed short2
                     logger.info("Input short2: {} => {}".format(self.short2, filetype.guess(self.short2)))
-                    if self.check_filetype(self.short2) == False:
-                        logger.error("invalid input file format")
-                        exit()
+                    if self.check_filetype(self.short2) == None:
+                        pass
+                    else:
+                        self.short2 = self.check_filetype(self.short2)
                 else:
                     logger.info("Input short2: {}".format(self.short2))
-                print("HE")
-        
+
         elif self.input_type in ["contigs", "peptides"]:
             if not self.input_sequence:
                 logger.error("FASTA File is necessary for 'contigs/peptides' command.")
@@ -97,7 +100,11 @@ class AMP(AMPBase):
                 logger.error("input file does not exist: {}".format(self.input_sequence))
                 exit()
             else:
-                logger.info("{} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
+                logger.info("Input sequence: {} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
+                if self.check_filetype(self.input_sequence) == None:
+                    pass
+                else:
+                    self.input_sequence = self.check_filetype(self.input_sequence)
 
 
         if self.threads > os.cpu_count():
@@ -109,44 +116,54 @@ class AMP(AMPBase):
     def check_filetype(self, file):
         kind = filetype.guess(file)
         if kind is None:
+            # print("TEST THIS")
+            # print("CHECK", self.is_fasta(file))
             if self.is_fasta(file) == False:
                 logger.error("invalid fasta")
                 exit()
             else:
-                return True
-        # else:
-        #     if kind.extension in ["gz","bz2"]:
-        #         if self.is_fasta(kind.extension) == False:
-        #             logger.error("invalid fasta")
-        #             exit()
-        #         # uncompressed input and use uncompressed file
-        #         filename = os.path.basename(self.input_sequence)
-        #         umcompressed_file = os.path.join(self.output_dir, "{}.temp.uncompressed.fsa".format(filename))
-        #         with open(umcompressed_file, "w") as file_out:
-        #             if kind.extension == "gz":
-        #                 with gzip.open(self.input_sequence, "rt") as handle:
-        #                     file_out.write(handle.read())
-        #             else:
-        #                 with bz2.open(self.input_sequence, "rt") as handle:
-        #                     file_out.write(handle.read())
+                return
+        else:
+            if kind.extension in ["gz","bz2"]:
+                # if self.is_fasta(file, kind.extension) == False:
+                #     logger.error("invalid fasta")
+                #     exit()
 
-        #         self.input_sequence = umcompressed_file
-        #         self.umcompressed_file = umcompressed_file
-        #     else:
-        #         logger.error("Sorry, no support for file format {}".format(kind.mime))
-        #         exit()
+                # uncompressed input and use uncompressed file
+                filename = os.path.basename(file)
+                umcompressed_file = os.path.join(self.output_dir, "{}.temp.uncompressed.fsa".format(filename))
+                with open(umcompressed_file, "w") as file_out:
+                    if kind.extension == "gz":
+                        with gzip.open(file, "rt") as handle:
+                            file_out.write(handle.read())
+                    else:
+                        with bz2.open(file, "rt") as handle:
+                            file_out.write(handle.read())
+
+                if self.is_fasta(umcompressed_file) == False:
+                    logger.error("invalid fasta")
+                    exit()
+                return umcompressed_file
+            else:
+                logger.error("Sorry, no support for file format {}".format(kind.mime))
+                exit()
 
     def is_fasta(self, file, extension=None):
         if extension is None:
             with open(file, "r") as handle:
                 fasta = SeqIO.parse(handle, "fasta")
+# 有bug
+                # print("RIGHT")
                 self.check_record(fasta)
                 return True
         elif extension in ["gz", "bz2"]:
             if extension == "gz":
+                # print("GZ")
+                # print(file)
                 with gzip.open(file, "rt") as handle:
                     fasta = SeqIO.parse(handle, "fasta")
-                    self.check_record(fasta)
+                    # print("check_record")
+                    print(self.check_record(fasta))
             else:
                 with bz2.open(file, "rt") as handle:
                     fasta = SeqIO.parse(handle, "fasta")
@@ -157,16 +174,22 @@ class AMP(AMPBase):
 
     def check_record(self, fasta):
         # check each record in the file
+        print("!!!")
+        print(self.input_type)
+        print(fasta)
         for record in fasta:
+# for loop 進不來, hen 怪
+            print("HERE")
             if any(record.id) == False or any(record.seq) == False:
                 return False
-            if self.input_type == "contig":
+            if self.input_type in ["reads", "contigs"]:
+                print("READS")
                 return self.is_dna(record.seq)
-            if self.input_type == "protein":
+            if self.input_type == "peptides":
                 return self.is_protein(record.seq)
     
     # @staticmethod
-    def is_dna(self, sequence):
+    def is_dna(sequence):
         #  dna codes
         nucleotide_dict = {'A': 0, 'T': 0, 'G': 0, 'C': 0, 'N': 0, 'U': 0,
                            #  other dna codes
@@ -193,7 +216,7 @@ class AMP(AMPBase):
         return True
 
     @staticmethod
-    def is_protein(self, sequence):
+    def is_protein(sequence):
         amino_acids_dict = {
             # common symbols between protein and dna codes
             'A': 0, 'T': 0, 'G': 0, 'C': 0, 'N': 0, 'U': 0,
@@ -223,23 +246,27 @@ class AMP(AMPBase):
 
 
     def run(self):
-        # print("TEST1")
-        # print(self.output_file)
         self.make_output_directory()
         self.validate_inputs()
+        # self.qc_inputs()
         # self.run_blast()
+    
+    # def qc_inputs(self):
+
 
     def run_blast(self):
-        """Runs blast."""
-        if self.input_type == "protein":
+        # Runs blast.
+        if self.input_type == "peptides":
             self.process_protein()
-        elif self.input_type == "contig":
+        elif self.input_type == "contigs":
             self.process_contig()
+        elif self.input_type == "reads":
+            self.process_metagenomics()
         else:
             exit()
 
     def process_metagenomics(self):
-        """Process metagenomics short reads."""
+        # Process metagenomics short reads.
         short1 = os.path.basename(self.short1)
         short2 = os.path.basename(self.short2)
         print("HERE")
@@ -264,7 +291,7 @@ class AMP(AMPBase):
 
 
     def process_protein(self):
-        """Process protein sequence(s)."""
+        # Process protein sequence(s).
         file_name = os.path.basename(self.input_sequence)
         output = self.output_file
         if self.aligner == "diamond":
@@ -276,7 +303,7 @@ class AMP(AMPBase):
 
 
     def process_contig(self):
-        """Process nuclotide sequence(s)."""
+        # Process nuclotide sequence(s).
         file_name = os.path.basename(self.input_sequence)
         output = self.output_file
         orf_obj = ORF(input_file=self.input_sequence)
