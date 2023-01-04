@@ -1,4 +1,5 @@
 from script.Database import Database
+from script.Fastp import Fastp
 from script.ORF import ORF
 from script.Blast import Blast
 from script.Diamond import Diamond
@@ -125,12 +126,8 @@ class AMP(AMPBase):
                 return
         else:
             if kind.extension in ["gz","bz2"]:
-                # if self.is_fasta(file, kind.extension) == False:
-                #     logger.error("invalid fasta")
-                #     exit()
-
                 # uncompressed input and use uncompressed file
-                filename = os.path.basename(file)
+                filename = os.path.basename(file).split(".")[0]
                 umcompressed_file = os.path.join(self.output_dir, "{}.temp.uncompressed.fsa".format(filename))
                 with open(umcompressed_file, "w") as file_out:
                     if kind.extension == "gz":
@@ -174,9 +171,9 @@ class AMP(AMPBase):
 
     def check_record(self, fasta):
         # check each record in the file
-        print("!!!")
-        print(self.input_type)
-        print(fasta)
+ #       print("!!!")
+ #       print(self.input_type)
+ #       print(fasta)
         for record in fasta:
 # for loop 進不來, hen 怪
             print("HERE")
@@ -248,11 +245,29 @@ class AMP(AMPBase):
     def run(self):
         self.make_output_directory()
         self.validate_inputs()
-        # self.qc_inputs()
+        self.qc_inputs()
         # self.run_blast()
     
-    # def qc_inputs(self):
-
+    def qc_inputs(self):
+        # self.short1 = "/home/chase/Data/MetaACPfinder/0_rawdata/SRR11749285_qc/SRR11749285_1.fastq"
+        # self.short2 = "/home/chase/github/mACPfinder/new_folder/SRR11749285_2.fastq.gz.temp.uncompressed.fsa"
+        
+        # run fastp for quality control: remove N base.
+        try:
+            if self.input_type == "reads":
+                if self.short2:
+                    #  short1, short2=None, output_dir=None, num_threads=16
+                    qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=self.output_dir, num_threads=self.threads)
+                    qc_obj.run()
+                else:
+                    qc_obj = Fastp(short1=self.short1, output_dir=self.output_dir, num_threads=self.threads)
+                    qc_obj.run()
+            else:
+                self.write_stub_output_file()
+        except Exception as e:
+            logger.exception("failed to write orf file")
+        else:
+            pass
 
     def run_blast(self):
         # Runs blast.
@@ -323,6 +338,11 @@ class AMP(AMPBase):
             logger.exception("failed to write orf file")
         else:
             pass
+
+    def write_stub_output_file(self):
+        # write empty output file if there are no open reading frames
+        with open(os.path.join(self.output_dir, "out.txt"), 'w') as fout:
+            fout.write(json.dumps({}))
 
 
 
