@@ -8,7 +8,8 @@ node_modules/
 dist/
 __pycache__/
 .vscode/
-db
+db/
+test/
 
 # Compiled Java class files
 *.class
@@ -19,12 +20,6 @@ db
 # Rar fasta files
 *.fasta
 
-# Database files
-# protein.db.*
-
-# Example files
-# example*
-
 # Log files
 *.log
 
@@ -33,7 +28,6 @@ db
 
 # Maven
 target/
-dist/
 
 # JetBrains IDE
 .idea/
@@ -51,12 +45,3 @@ Thumbs.db
 *.app
 *.exe
 *.war
-
-# Large media files
-*.mp4
-*.tiff
-*.avi
-*.flv
-*.mov
-*.wmv
-*.pyc
