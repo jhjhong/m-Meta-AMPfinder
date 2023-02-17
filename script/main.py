@@ -29,20 +29,24 @@ class Main(object):
                 parse blast database:
                 macpfinder load --input_json ampfinder_210729.json
 
-                run mACPfinder on peptides:  
-                macpfinder peptides --fasta example_seqs/expep.faa.gz --output out_peptides
-                
-                run mACPfinder on contigs:
-                macpfinder contigs --fasta example_seqs/excontigs.fna.gz --output out_contigs
-                
                 run mACPfinder on paired-end reads:
-                macpfinder reads -1 example_seqs/R1.fq.gz -2 example_seqs/R2.fq.gz --output out_metag --outtag example_metag
+                macpfinder main -1 example_seqs/R1.fq.gz -2 example_seqs/R2.fq.gz -t read --output out_metag --outtag example_metag
+
+                
 
                 removes databases and temporary files:
                 macpfinder clean
                 
                 For more information,please read the docs: https://github.com/jhjhong/mACPfinder
                '''
+                # run mACPfinder on peptides:  
+                # macpfinder peptides --fasta example_seqs/expep.faa.gz --output out_peptides
+                
+                # run mACPfinder on contigs:
+                # macpfinder contigs --fasta example_seqs/excontigs.fna.gz --output out_contigs
+                
+                # run mACPfinder on paired-end reads:
+                # macpfinder reads -1 example_seqs/R1.fq.gz -2 example_seqs/R2.fq.gz --output out_metag --outtag example_metag
 
         parser = argparse.ArgumentParser(prog="macpfinder", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION), epilog=SOFTWARE_SUMMARY, usage=USAGE)
         # parser.add_argument('command', choices=['peptides', 'contigs', 'reads', 'load', 'auto_load', 'clean'], help='Subcommand to run')
@@ -92,7 +96,7 @@ class Main(object):
                             help="path to the output directory (required)")
         parser.add_argument('-t', '--input_type', dest="input_type",
                             type=str.lower,
-                            choices=['reads', 'contigs', 'peptides'],
+                            choices=['read', 'contig', 'peptide'],
                             required=True,
                             help='specify data input type')
         parser.add_argument('-a', '--alignment_tool', dest="aligner",
@@ -110,6 +114,9 @@ class Main(object):
 
     def main_run(self, args):
         print(vars(args))
+        # args = ['gtdbtk', 'classify_wf', '--genome_dir', genome_test_dir,
+        #             '--out_dir', output_dir, '--cpus', str(options.cpus), '-f']
+        #     self.logger.info('Command: {}'.format(' '.join(args)))
         amp_obj = AMP(**vars(args))
         amp_obj.run()
 

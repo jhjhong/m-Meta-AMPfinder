@@ -60,7 +60,7 @@ class AMP(AMPBase):
         #    - validate input file name and out file name
 		# 	 - validation for mutually exclusive options e.g. protein sequence for contig input_type etc
         # Exits with an error message if not the case
-        if self.input_type == "reads":
+        if self.input_type == "read":
             if not self.short1:
                 if not self.input_sequence:
                     logger.error("FQ file is necessary for 'reads' command.")
@@ -94,7 +94,7 @@ class AMP(AMPBase):
                 else:
                     logger.info("Input short2: {}".format(self.short2))
 
-        elif self.input_type in ["contigs", "peptides"]:
+        elif self.input_type in ["contig", "peptide"]:
             if not self.input_sequence:
                 logger.error("FASTA File is necessary for 'contigs/peptides' command.")
             if not os.path.exists(self.input_sequence):
@@ -179,10 +179,10 @@ class AMP(AMPBase):
             print("HERE")
             if any(record.id) == False or any(record.seq) == False:
                 return False
-            if self.input_type in ["reads", "contigs"]:
+            if self.input_type in ["read", "contig"]:
                 print("READS")
                 return self.is_dna(record.seq)
-            if self.input_type == "peptides":
+            if self.input_type == "peptide":
                 return self.is_protein(record.seq)
     
     # @staticmethod
@@ -254,7 +254,7 @@ class AMP(AMPBase):
         
         # run fastp for quality control: remove N base.
         try:
-            if self.input_type == "reads":
+            if self.input_type == "read":
                 if self.short2:
                     #  short1, short2=None, output_dir=None, num_threads=16
                     qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=self.output_dir, num_threads=self.threads)
@@ -271,11 +271,11 @@ class AMP(AMPBase):
 
     def run_blast(self):
         # Runs blast.
-        if self.input_type == "peptides":
+        if self.input_type == "peptide":
             self.process_protein()
-        elif self.input_type == "contigs":
+        elif self.input_type == "contig":
             self.process_contig()
-        elif self.input_type == "reads":
+        elif self.input_type == "read":
             self.process_metagenomics()
         else:
             exit()
