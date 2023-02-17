@@ -1,5 +1,6 @@
 from script.Database import Database
 from script.Fastp import Fastp
+from script.Megahit import Megahit
 from script.ORF import ORF
 from script.Blast import Blast
 from script.Diamond import Diamond
@@ -15,7 +16,7 @@ import bz2
 
 
 class AMP(AMPBase):
-    def __init__(self, input_type='', short1=None, short2=None, input_sequence=None , threads=32, output_dir=None, data='na', aligner='blast', debug=False):
+    def __init__(self, input_type='', short1=None, short2=None, input_sequence=None , threads=32, output_dir=None, data='na', assembler='megahit', aligner='blast', debug=False):
         # Change some arguments to full paths.
         if short1:
             self.short1 = os.path.abspath(short1)
@@ -29,6 +30,7 @@ class AMP(AMPBase):
         self.input_type = input_type.lower()
         self.threads = threads
         self.output_dir = os.path.abspath(output_dir)
+        self.assembler = assembler.lower()
         self.aligner = aligner.lower()
 
         self.debug = debug
@@ -246,12 +248,10 @@ class AMP(AMPBase):
         self.make_output_directory()
         self.validate_inputs()
         self.qc_inputs()
+        self.run_assembly()
         # self.run_blast()
     
     def qc_inputs(self):
-        # self.short1 = "/home/chase/Data/MetaACPfinder/0_rawdata/SRR11749285_qc/SRR11749285_1.fastq"
-        # self.short2 = "/home/chase/github/mACPfinder/new_folder/SRR11749285_2.fastq.gz.temp.uncompressed.fsa"
-        
         # run fastp for quality control: remove N base.
         try:
             if self.input_type == "read":
@@ -262,8 +262,43 @@ class AMP(AMPBase):
                 else:
                     qc_obj = Fastp(short1=self.short1, output_dir=self.output_dir, num_threads=self.threads)
                     qc_obj.run()
-            else:
-                self.write_stub_output_file()
+            # else:
+            #     self.write_stub_output_file()
+        except Exception as e:
+            logger.exception("failed to write orf file")
+        else:
+            pass
+    
+    def run_assembly(self):
+        # Runs assembly.
+        if self.assembler == "megahit":
+            self.assembly_megahit()
+        elif self.assembler == "metaspades":
+            self.assembly_metaspades()
+        else:
+            exit()
+
+    def assembly_megahit(self):
+        # Process assembly paired reads.
+        short1 = os.path.basename(self.short1)
+        highqual_fsa_file_1 = os.path.join(self.output_dir, "{}.temp.highqual.fsa".format(short1.split(".")[0]))
+        if self.short2:
+            short2 = os.path.basename(self.short2)
+            highqual_fsa_file_2 = os.path.join(self.output_dir, "{}.temp.highqual.fsa".format(short2.split(".")[0]))
+        try:
+            if self.input_type == "read":
+                if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0 :
+                    if self.short2:
+                        if self.assembler == "megahit":
+                            megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                            megahit_obj.run()
+                        else:
+                            spdes_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                            spdes_obj.run()
+                    else:
+                        pass
+                else:
+                    self.write_stub_output_file()
         except Exception as e:
             logger.exception("failed to write orf file")
         else:
@@ -272,15 +307,15 @@ class AMP(AMPBase):
     def run_blast(self):
         # Runs blast.
         if self.input_type == "peptide":
-            self.process_protein()
+            self.blast_protein()
         elif self.input_type == "contig":
-            self.process_contig()
+            self.blast_contig()
         elif self.input_type == "read":
-            self.process_metagenomics()
+            self.blast_metagenomics()
         else:
             exit()
 
-    def process_metagenomics(self):
+    def blast_metagenomics(self):
         # Process metagenomics short reads.
         short1 = os.path.basename(self.short1)
         short2 = os.path.basename(self.short2)
@@ -305,7 +340,7 @@ class AMP(AMPBase):
             pass
 
 
-    def process_protein(self):
+    def blast_protein(self):
         # Process protein sequence(s).
         file_name = os.path.basename(self.input_sequence)
         output = self.output_file
@@ -317,7 +352,7 @@ class AMP(AMPBase):
             blast_obj.run()
 
 
-    def process_contig(self):
+    def blast_contig(self):
         # Process nuclotide sequence(s).
         file_name = os.path.basename(self.input_sequence)
         output = self.output_file
