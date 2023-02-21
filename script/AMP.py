@@ -53,7 +53,8 @@ class AMP(AMPBase):
                 exit()
             logger.info("Making output directory: {}".format(self.output_dir))
         elif os.listdir(self.output_dir):
-            logger.info("The output directory already exists and files may be reused or overwritten: {}".format(self.output_dir))
+            logger.info("The output directory {} already exists, please change the parameter -o to another value to avoid overwriting.".format(self.output_dir))
+            # exit()
         else:  # directory exists but is empty
             logger.info("The output directory already exists: {}".format(self.output_dir))
 
@@ -256,14 +257,12 @@ class AMP(AMPBase):
         try:
             if self.input_type == "read":
                 if self.short2:
-                    #  short1, short2=None, output_dir=None, num_threads=16
-                    qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=self.output_dir, num_threads=self.threads)
+                    qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
                     qc_obj.run()
                 else:
-                    qc_obj = Fastp(short1=self.short1, output_dir=self.output_dir, num_threads=self.threads)
+                    qc_obj = Fastp(short1=self.short1, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
                     qc_obj.run()
-            # else:
-            #     self.write_stub_output_file()
+
         except Exception as e:
             logger.exception("failed to write orf file")
         else:
@@ -281,24 +280,50 @@ class AMP(AMPBase):
     def assembly_megahit(self):
         # Process assembly paired reads.
         short1 = os.path.basename(self.short1)
-        highqual_fsa_file_1 = os.path.join(self.output_dir, "{}.temp.highqual.fsa".format(short1.split(".")[0]))
+        highqual_fsa_file_1 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short1.split(".")[0]))
         if self.short2:
             short2 = os.path.basename(self.short2)
-            highqual_fsa_file_2 = os.path.join(self.output_dir, "{}.temp.highqual.fsa".format(short2.split(".")[0]))
+            highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short2.split(".")[0]))
         try:
             if self.input_type == "read":
-                if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0 :
-                    if self.short2:
-                        if self.assembler == "megahit":
-                            megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
-                            megahit_obj.run()
-                        else:
-                            spdes_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
-                            spdes_obj.run()
+                if self.short2:
+                    if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0 :
+                        megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                        megahit_obj.run()
                     else:
-                        pass
+                        logger.error("Each sequence quality are low!")
                 else:
-                    self.write_stub_output_file()
+                    if os.stat(highqual_fsa_file_1).st_size > 0 :
+                        megahit_obj = Megahit(input1=highqual_fsa_file_1, output_dir=self.output_dir, num_threads=self.threads)
+                        megahit_obj.run()
+                    else:
+                        logger.error("Each sequence quality are low!")
+        except Exception as e:
+            logger.exception("failed to write orf file")
+        else:
+            pass
+    
+    def assembly_metaspades(self):
+        # Process assembly paired reads.
+        short1 = os.path.basename(self.short1)
+        highqual_fsa_file_1 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short1.split(".")[0]))
+        if self.short2:
+            short2 = os.path.basename(self.short2)
+            highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short2.split(".")[0]))
+        try:
+            if self.input_type == "read":
+                if self.short2:
+                    if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0 :
+                        metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                        metaspades_obj.run()
+                    else:
+                        logger.error("Each sequence quality are low!")
+                else:
+                    if os.stat(highqual_fsa_file_1).st_size > 0 :
+                        metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                        metaspades_obj.run()
+                    else:
+                        logger.error("Each sequence quality are low!")
         except Exception as e:
             logger.exception("failed to write orf file")
         else:

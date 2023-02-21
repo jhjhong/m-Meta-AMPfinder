@@ -13,27 +13,30 @@ class Megahit(object):
         return "Megahit({}".format(self.__dict__)
 
     def run(self):
-        print(self.input1)
         f1_path, f1_name = os.path.split(self.input1)
-        print(f1_path, f1_name)
         q1_name = "{}.temp.highqual.fsa".format(f1_name.split(".")[0])
+
+        stdout = "2> /dev/null"
 
         if self.input2:
             f2_path, f2_name = os.path.split(self.input2)
             q2_name = "{}.temp.highqual.fsa".format(f2_name.split(".")[0])
-            short2 = "-I {short2} -O {out2}".format(short2=self.short2, out2=os.path.join(self.output_dir, q2_name))
-        
-        stdout = "2> /dev/null"
 
-        cmd = "megahit --presets meta-large -i {short1} -o {out1} {short2} -n 0 -w {num_threads} -j {json} -h {html} {stdout}" \
+            cmd = "megahit --presets meta-large -1 {q1_file} -2 {q2_file} --min-contig-len 1000 -o {out} -t {num_threads} {stdout}" \
             .format(
-                short1=self.short1,
-                out1=os.path.join(self.output_dir, q1_name),
-                short2=short2,
+                q1_file=os.path.join(self.output_dir, q1_name),
+                q2_file=os.path.join(self.output_dir, q2_name),
+                out=os.path.join(self.output_dir, "temp.assembly"),
                 num_threads=self.num_threads,
-                json=os.path.join(self.output_dir, json),
-                html=os.path.join(self.output_dir, html),
                 stdout=stdout
             )
+        else:
+            cmd = "megahit --presets meta-large -r {q1_file} -o {out} --min-contig-len 1000 -t {num_threads} {stdout}" \
+                .format(
+                    q1_file=os.path.join(self.output_dir, q1_name),
+                    out=os.path.join(self.output_dir, "temp.assembly"),
+                    num_threads=self.num_threads,
+                    stdout=stdout
+                )
         print(cmd)
         # os.system(cmd)
