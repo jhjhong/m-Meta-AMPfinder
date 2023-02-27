@@ -1,7 +1,8 @@
 from script.Database import Database
 from script.Fastp import Fastp
 from script.Megahit import Megahit
-from script.ORF import ORF
+from script.Spades import Spades
+from script.ORF import PyORF
 from script.Blast import Blast
 from script.Diamond import Diamond
 from script.settings import *
@@ -248,20 +249,23 @@ class AMP(AMPBase):
     def run(self):
         self.make_output_directory()
         self.validate_inputs()
-        self.qc_inputs()
-        self.run_assembly()
+        # if self.input_type == "read":
+        #     self.qc_inputs()
+        # if self.input_type == "read":
+        #     self.run_assembly()
+        if self.input_type in ["read", "contig"]:
+            self.run_smorfs()
         # self.run_blast()
     
     def qc_inputs(self):
         # run fastp for quality control: remove N base.
         try:
-            if self.input_type == "read":
-                if self.short2:
-                    qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
-                    qc_obj.run()
-                else:
-                    qc_obj = Fastp(short1=self.short1, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
-                    qc_obj.run()
+            if self.short2:
+                qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
+                qc_obj.run()
+            else:
+                qc_obj = Fastp(short1=self.short1, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
+                qc_obj.run()
 
         except Exception as e:
             logger.exception("failed to write orf file")
@@ -280,24 +284,24 @@ class AMP(AMPBase):
     def assembly_megahit(self):
         # Process assembly paired reads.
         short1 = os.path.basename(self.short1)
-        highqual_fsa_file_1 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short1.split(".")[0]))
+        highqual_fsa_file_1 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short1.split(".")[0]))
         if self.short2:
             short2 = os.path.basename(self.short2)
-            highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short2.split(".")[0]))
+            highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short2.split(".")[0]))
         try:
-            if self.input_type == "read":
-                if self.short2:
-                    if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0 :
-                        megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
-                        megahit_obj.run()
-                    else:
-                        logger.error("Each sequence quality are low!")
+            logger.info("Run Megahit assembler")
+            if self.short2:
+                if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0:
+                    megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                    megahit_obj.run()
                 else:
-                    if os.stat(highqual_fsa_file_1).st_size > 0 :
-                        megahit_obj = Megahit(input1=highqual_fsa_file_1, output_dir=self.output_dir, num_threads=self.threads)
-                        megahit_obj.run()
-                    else:
-                        logger.error("Each sequence quality are low!")
+                    logger.error("Each sequence quality are low!")
+            else:
+                if os.stat(highqual_fsa_file_1).st_size > 0 :
+                    megahit_obj = Megahit(input1=highqual_fsa_file_1, output_dir=self.output_dir, num_threads=self.threads)
+                    megahit_obj.run()
+                else:
+                    logger.error("Each sequence quality are low!")
         except Exception as e:
             logger.exception("failed to write orf file")
         else:
@@ -306,24 +310,44 @@ class AMP(AMPBase):
     def assembly_metaspades(self):
         # Process assembly paired reads.
         short1 = os.path.basename(self.short1)
-        highqual_fsa_file_1 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short1.split(".")[0]))
+        highqual_fsa_file_1 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short1.split(".")[0]))
         if self.short2:
             short2 = os.path.basename(self.short2)
-            highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fsa".format(short2.split(".")[0]))
+            highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short2.split(".")[0]))
         try:
-            if self.input_type == "read":
-                if self.short2:
-                    if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0 :
-                        metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
-                        metaspades_obj.run()
-                    else:
-                        logger.error("Each sequence quality are low!")
+            logger.info("Run Metaspades assembler")
+            if self.short2:
+                if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0:
+                    metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
+                    metaspades_obj.run()
                 else:
-                    if os.stat(highqual_fsa_file_1).st_size > 0 :
-                        metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
-                        metaspades_obj.run()
-                    else:
-                        logger.error("Each sequence quality are low!")
+                    logger.error("Each sequence quality are low!")
+            else:
+                if os.stat(highqual_fsa_file_1).st_size > 0 :
+                    metaspades_obj = Spades(input1=highqual_fsa_file_1, output_dir=self.output_dir, num_threads=self.threads)
+                    metaspades_obj.run()
+                else:
+                    logger.error("Each sequence quality are low!")
+        except Exception as e:
+            logger.exception("failed to write orf file")
+        else:
+            pass
+
+    def run_smorfs(self):
+        # run pyrodigal to predict genes.
+        logger.info("Run Pyrodigal ORFfinder")
+        input_file = os.path.join(self.output_dir, "temp.assembly/contig.fa")
+
+        self.clean = True
+        self.low_quality = False
+
+        try:
+            if os.stat(input_file).st_size > 0:
+                orf_obj = PyORF(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.smorfs"), num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
+                orf_obj.run()
+            else:
+                logger.error("The contigs file are empty!")
+
         except Exception as e:
             logger.exception("failed to write orf file")
         else:

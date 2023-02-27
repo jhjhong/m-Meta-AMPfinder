@@ -1,7 +1,7 @@
 from script.settings import *
 
 
-class Megahit(object):
+class Spades(object):
 
     def __init__(self, input1, input2=None, output_dir=None, num_threads=16):
         self.input1 = input1
@@ -10,7 +10,7 @@ class Megahit(object):
         self.num_threads = num_threads
 
     def __repr__(self):
-        return "Megahit({}".format(self.__dict__)
+        return "Metaspades({}".format(self.__dict__)
 
     def run(self):
         f1_path, f1_name = os.path.split(self.input1)
@@ -22,7 +22,7 @@ class Megahit(object):
             f2_path, f2_name = os.path.split(self.input2)
             q2_name = "{}.temp.highqual.fq".format(f2_name.split(".")[0])
 
-            cmd = "megahit --presets meta-large -1 {q1_file} -2 {q2_file} --min-contig-len 1000 -o {out} -t {num_threads} {stdout}" \
+            cmd = "metaspades.py -1 {q1_file} -2 {q2_file} -o {out} -t {num_threads} {stdout}" \
             .format(
                 q1_file=os.path.join(f1_path, q1_name),
                 q2_file=os.path.join(f2_path, q2_name),
