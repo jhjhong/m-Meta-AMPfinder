@@ -15,7 +15,7 @@ class Fastp(object):
 
     def run(self):
         f1_path, f1_name = os.path.split(self.short1)
-        q1_name = "{}.temp.highqual.fsa".format(f1_name.split(".")[0])
+        q1_name = "{}.temp.highqual.fq".format(f1_name.split(".")[0])
         json= "{}.temp.fastp.json".format(f1_name.split(".")[0])
         html= "{}.temp.fastp.html".format(f1_name.split(".")[0])
 
@@ -28,7 +28,7 @@ class Fastp(object):
 
         if self.short2:
             f2_path, f2_name = os.path.split(self.short2)
-            q2_name = "{}.temp.highqual.fsa".format(f2_name.split(".")[0])
+            q2_name = "{}.temp.highqual.fq".format(f2_name.split(".")[0])
             short2 = "-I {short2} -O {out2}".format(short2=self.short2, out2=os.path.join(self.output_dir, q2_name))
 
             cmd = "fastp -i {short1} -o {out1} {short2} -n 0 -w {num_threads} -j {json} -h {html} {stdout}" \
