@@ -104,7 +104,7 @@ class Main(object):
                             help="number of threads (CPUs) to use in the BLAST search (default={})".format(self.cpu_count))
         parser.add_argument('--assembler', dest="assembler",
                             type=str.lower,
-                            choices=['megahit', 'mataspades'],
+                            choices=['megahit', 'metaspades'],
                             default="megahit",
                             help="specify assembler tool (default = megahit)")
         parser.add_argument('--alignment_tool', dest="aligner",
