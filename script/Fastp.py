@@ -51,5 +51,5 @@ class Fastp(object):
                     html=os.path.join(self.output_dir, html),
                     stdout=stdout
                 )
-        # print(cmd)
+        logger.info(cmd)
         os.system(cmd)
