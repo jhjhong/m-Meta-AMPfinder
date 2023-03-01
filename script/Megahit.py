@@ -1,5 +1,5 @@
 from script.settings import *
-
+import shutil
 
 class Megahit(object):
 
@@ -38,5 +38,10 @@ class Megahit(object):
                     num_threads=self.num_threads,
                     stdout=stdout
                 )
-        print(cmd)
-        # os.system(cmd)
+        # print(cmd)
+        os.system(cmd)
+
+        # move final file
+        original = os.path.join(self.output_dir, "temp.assembly/final.contigs.fa")
+        target = os.path.join(self.output_dir, "final.contigs.fasta")
+        shutil.copyfile(original, target)

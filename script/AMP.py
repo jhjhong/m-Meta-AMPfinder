@@ -249,10 +249,10 @@ class AMP(AMPBase):
     def run(self):
         self.make_output_directory()
         self.validate_inputs()
-        # if self.input_type == "read":
-        #     self.qc_inputs()
-        # if self.input_type == "read":
-        #     self.run_assembly()
+        if self.input_type == "read":
+            self.qc_inputs()
+        if self.input_type == "read":
+            self.run_assembly()
         if self.input_type in ["read", "contig"]:
             self.run_smorfs()
         # self.run_blast()
