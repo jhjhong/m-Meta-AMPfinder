@@ -99,14 +99,19 @@ class Main(object):
                             choices=['read', 'contig', 'peptide'],
                             required=True,
                             help='specify data input type')
-        parser.add_argument('-a', '--alignment_tool', dest="aligner",
+        parser.add_argument('-n', '--num_threads', type=int, dest="threads",
+                            default=self.cpu_count,
+                            help="number of threads (CPUs) to use in the BLAST search (default={})".format(self.cpu_count))
+        parser.add_argument('--assembler', dest="assembler",
+                            type=str.lower,
+                            choices=['megahit', 'metaspades'],
+                            default="megahit",
+                            help="specify assembler tool (default = megahit)")
+        parser.add_argument('--alignment_tool', dest="aligner",
                             type=str.upper,
                             choices=['DIAMOND', 'BLAST'],
                             default="BLAST",
                             help="specify alignment tool (default = BLAST)")
-        parser.add_argument('-n', '--num_threads', type=int, dest="threads",
-                            default=self.cpu_count,
-                            help="number of threads (CPUs) to use in the BLAST search (default={})".format(self.cpu_count))
         parser.add_argument('-v', '--version', action='version', version="{}".format(SOFTWARE_VERSION),
                             help="show mACPfinder software version number")
         parser.add_argument('--debug', dest="debug", action="store_true", help="debug mode")

@@ -16,6 +16,8 @@ dependencies:
   - pyahocorasick 1.4.0
   - blast 2.9.0
   - prodigal >= 2.6.3
-  - pyrodigal >= 2.0.0
+  - pyrodigal >= 2.1.0
   - diamond 0.8.36
   - fastp >=0.23.0
+  - megahit 1.2.9
+  - spades 3.15.5
