@@ -1,5 +1,4 @@
 from script.settings import *
-import shutil
 
 class Spades(object):
 
@@ -38,10 +37,10 @@ class Spades(object):
                     num_threads=self.num_threads,
                     stdout=stdout
                 )
-        # print(cmd)
+        logger.info(cmd)
         os.system(cmd)
         
         # move final file
-        original = os.path.join(self.output_dir, "temp.assembly/final.contigs.fa")
+        original = os.path.join(self.output_dir, "temp.assembly/contigs.fasta")
         target = os.path.join(self.output_dir, "final.contigs.fasta")
-        shutil.copyfile(original, target)
+        os.system("ln -s {final} {soft_link}".format(final = original, soft_link = target))
