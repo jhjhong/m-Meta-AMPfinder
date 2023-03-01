@@ -336,15 +336,16 @@ class AMP(AMPBase):
     def run_smorfs(self):
         # run pyrodigal to predict genes.
         logger.info("Run Pyrodigal ORFfinder")
-        input_file = os.path.join(self.output_dir, "temp.assembly/contig.fa")
+        input_file = os.path.join(self.output_dir, "final.contigs.fasta")
 
         self.clean = True
         self.low_quality = False
 
         try:
             if os.stat(input_file).st_size > 0:
-                orf_obj = PyORF(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.smorfs"), num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
+                orf_obj = PyORF(input_file=input_file, output_dir=self.output_dir, num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
                 orf_obj.run()
+
             else:
                 logger.error("The contigs file are empty!")
 
