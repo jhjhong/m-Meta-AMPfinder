@@ -37,10 +37,10 @@ class Spades(object):
                     num_threads=self.num_threads,
                     stdout=stdout
                 )
-        logger.info(cmd)
+        logger.debug(cmd)
         os.system(cmd)
         
         # move final file
         original = os.path.join(self.output_dir, "temp.assembly/contigs.fasta")
         target = os.path.join(self.output_dir, "final.contigs.fasta")
-        os.system("ln -s {final} {soft_link}".format(final = original, soft_link = target))
+        os.system("ln -fs {final} {soft_link}".format(final = original, soft_link = target))
