@@ -81,7 +81,7 @@ class PyORF(object):
                 potential_genes=os.path.join(self.output_dir, potential_genes)
             )
 
-        logger.info(cmd)
+        logger.debug(cmd)
         os.system(cmd)
 
         # filter 10 <= sequence length <= 100 for next classifier prediction
@@ -96,8 +96,8 @@ class PyORF(object):
         original_L100 = os.path.join(self.output_dir, "temp.smorfs/temp.contig.L100.fsa")
         target = os.path.join(self.output_dir, "final.smorfs.fsa")
         target_L100 = os.path.join(self.output_dir, "final.smorfs.L100.fsa")
-        os.system("ln -s {final} {soft_link}".format(final = original, soft_link = target))
-        os.system("ln -s {final} {soft_link}".format(final = original_L100, soft_link = target_L100))
+        os.system("ln -fs {final} {soft_link}".format(final = original, soft_link = target))
+        os.system("ln -fs {final} {soft_link}".format(final = original_L100, soft_link = target_L100))
 
 
 
