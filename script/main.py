@@ -110,7 +110,7 @@ class Main(object):
         parser.add_argument('--alignment_tool', dest="aligner",
                             type=str.upper,
                             choices=['DIAMOND', 'BLAST'],
-                            default="BLAST",
+                            default="DIAMOND",
                             help="specify alignment tool (default = BLAST)")
         parser.add_argument('-v', '--version', action='version', version="{}".format(SOFTWARE_VERSION),
                             help="show mACPfinder software version number")

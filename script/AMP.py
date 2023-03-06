@@ -54,7 +54,7 @@ class AMP(AMPBase):
                 exit()
             logger.info("Making output directory: {}".format(self.output_dir))
         elif os.listdir(self.output_dir):
-            logger.info("The output directory {} already exists, please change the parameter -o to another value to avoid overwriting.".format(self.output_dir))
+            logger.warning("The output directory {} already exists, please change the parameter -o to another value to avoid overwriting.".format(self.output_dir))
             # exit()
         else:  # directory exists but is empty
             logger.info("The output directory already exists: {}".format(self.output_dir))
@@ -248,14 +248,15 @@ class AMP(AMPBase):
 
     def run(self):
         self.make_output_directory()
-        self.validate_inputs()
+        # self.validate_inputs()
         if self.input_type == "read":
             self.qc_inputs()
         if self.input_type == "read":
             self.run_assembly()
         if self.input_type in ["read", "contig"]:
             self.run_smorfs()
-        # self.run_blast()
+        if self.input_type in ["read", "contig", "peptide"]:
+            self.run_blast()
     
     def qc_inputs(self):
         # run fastp for quality control: remove N base.
@@ -354,68 +355,22 @@ class AMP(AMPBase):
         else:
             pass
 
+
     def run_blast(self):
-        # Runs blast.
+        # Process blast sequence(s).
+        logger.info("Run alignment against AMPdb for known AMPs")
         if self.input_type == "peptide":
-            self.blast_protein()
-        elif self.input_type == "contig":
-            self.blast_contig()
-        elif self.input_type == "read":
-            self.blast_metagenomics()
-        else:
-            exit()
+            input_file = self.input_sequence
+        elif self.input_type in ["read", "contig"]:
+            input_file = os.path.join(self.output_dir, "final.smorfs.fsa")
 
-    def blast_metagenomics(self):
-        # Process metagenomics short reads.
-        short1 = os.path.basename(self.short1)
-        short2 = os.path.basename(self.short2)
-        print("HERE")
-        output = self.output_file
-        orf_obj = ORF(input_file=self.input_sequence)
-        orf_obj.contig_to_orf()
-        contig_fsa_file = os.path.join(self.working_directory, "{}.temp.contig.fsa".format(file_name))
         try:
-            if os.stat(contig_fsa_file).st_size > 0:
+            if os.stat(input_file).st_size > 0:
                 if self.aligner == "diamond":
-                    diamond_obj = Diamond(input_file=contig_fsa_file, output_file = output,num_threads=self.threads)
+                    diamond_obj = Diamond(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.alignment"), num_threads=self.threads)
                     diamond_obj.run()
                 else:
-                    blast_obj = Blast(input_file=contig_fsa_file, output_file = output, num_threads=self.threads)
-                    blast_obj.run()
-            else:
-                self.write_stub_output_file()
-        except Exception as e:
-            logger.exception("failed to write orf file")
-        else:
-            pass
-
-
-    def blast_protein(self):
-        # Process protein sequence(s).
-        file_name = os.path.basename(self.input_sequence)
-        output = self.output_file
-        if self.aligner == "diamond":
-            diamond_obj = Diamond(self.input_sequence, output_file = output, num_threads=self.threads)
-            diamond_obj.run()
-        else:
-            blast_obj = Blast(input_file= file_name,  output_file = output, num_threads=self.threads)
-            blast_obj.run()
-
-
-    def blast_contig(self):
-        # Process nuclotide sequence(s).
-        file_name = os.path.basename(self.input_sequence)
-        output = self.output_file
-        orf_obj = ORF(input_file=self.input_sequence)
-        orf_obj.contig_to_orf()
-        contig_fsa_file = os.path.join(self.working_directory, "{}.temp.contig.fsa".format(file_name))
-        try:
-            if os.stat(contig_fsa_file).st_size > 0:
-                if self.aligner == "diamond":
-                    diamond_obj = Diamond(input_file=contig_fsa_file, output_file = output,num_threads=self.threads)
-                    diamond_obj.run()
-                else:
-                    blast_obj = Blast(input_file=contig_fsa_file, output_file = output, num_threads=self.threads)
+                    blast_obj = Blast(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.alignment"), num_threads=self.threads)
                     blast_obj.run()
             else:
                 self.write_stub_output_file()
