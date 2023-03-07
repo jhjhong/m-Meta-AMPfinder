@@ -257,6 +257,8 @@ class AMP(AMPBase):
             self.run_smorfs()
         if self.input_type in ["read", "contig", "peptide"]:
             self.run_blast()
+        if self.input_type in ["read", "contig", "peptide"]:
+            self.run_pred()
     
     def qc_inputs(self):
         # run fastp for quality control: remove N base.
@@ -344,7 +346,7 @@ class AMP(AMPBase):
 
         try:
             if os.stat(input_file).st_size > 0:
-                orf_obj = PyORF(input_file=input_file, output_dir=self.output_dir, num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
+                orf_obj = PyORF(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.smorfs"), num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
                 orf_obj.run()
 
             else:
@@ -385,5 +387,20 @@ class AMP(AMPBase):
             fout.write(json.dumps({}))
 
 
+    def run_pred(self):
+        # run functional predict of AMPs.
+        logger.info("Run functional predict of AMPs")
+        input_file = os.path.join(self.output_dir, "final.smorfs.fsa")
 
+        try:
+            if os.stat(input_file).st_size > 0:
+                orf_obj = PyORF(input_file=input_file, output_dir=self.output_dir, num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
+                orf_obj.run()
 
+            else:
+                logger.error("The contigs file are empty!")
+
+        except Exception as e:
+            logger.exception("failed to write orf file")
+        else:
+            pass
