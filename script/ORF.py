@@ -26,14 +26,14 @@ class PyORF(object):
 
         cmd = "sed 's/*//g' {input_file} > {output_file}" \
         .format(
-                input_file = os.path.join(self.output_dir, "temp.smorfs/temp.contig.fsa"),
-                output_file = os.path.join(self.output_dir, "temp.smorfs/temp.contig.fsa1")
+                input_file = os.path.join(self.output_dir, "temp.contig.fsa"),
+                output_file = os.path.join(self.output_dir, "temp.contig.fsa1")
             )
         # print(cmd)
         os.system(cmd)
 
-        input_file = os.path.join(self.output_dir, "temp.smorfs/temp.contig.fsa1")
-        output_file = os.path.join(self.output_dir, "temp.smorfs/temp.contig.L100.fsa")
+        input_file = os.path.join(self.output_dir, "temp.contig.fsa1")
+        output_file = os.path.join(self.output_dir, "temp.contig.L100.fsa")
         output_handle = open(output_file, "w")
 
         try:
@@ -59,10 +59,10 @@ class PyORF(object):
             quality = "-p meta"
 
         filename = os.path.basename(self.input_file)
-        trans_file = "temp.smorfs/temp.contig.fsa"
-        output_file = "temp.smorfs/temp.draft"
-        nuc_file = "temp.smorfs/temp.contigToORF.fsa"
-        potential_genes = "temp.smorfs/temp.potentialGenes"
+        trans_file = "temp.contig.fsa"
+        output_file = "temp.draft"
+        nuc_file = "temp.contigToORF.fsa"
+        potential_genes = "temp.potentialGenes"
 
         if not os.path.exists(self.output_dir):
             logger.info("Making temp.orf folder {}".format(self.output_dir))
@@ -92,14 +92,9 @@ class PyORF(object):
             os.remove("{output_file}".format(output_file=os.path.join(self.output_dir, output_file)))
 
         # move final file
-        original = os.path.join(self.output_dir, "temp.smorfs/temp.contig.fsa")
-        original_L100 = os.path.join(self.output_dir, "temp.smorfs/temp.contig.L100.fsa")
-        target = os.path.join(self.output_dir, "final.smorfs.fsa")
-        target_L100 = os.path.join(self.output_dir, "final.smorfs.L100.fsa")
+        original = os.path.join(self.output_dir, "temp.contig.fsa")
+        original_L100 = os.path.join(self.output_dir, "temp.contig.L100.fsa")
+        target = os.path.join(os.path.abspath(os.path.join(self.output_dir, os.path.pardir)), "final.smorfs.fsa")
+        target_L100 = os.path.join(os.path.abspath(os.path.join(self.output_dir, os.path.pardir)), "final.smorfs.L100.fsa")
         os.system("ln -fs {final} {soft_link}".format(final = original, soft_link = target))
         os.system("ln -fs {final} {soft_link}".format(final = original_L100, soft_link = target_L100))
-
-
-
-
-

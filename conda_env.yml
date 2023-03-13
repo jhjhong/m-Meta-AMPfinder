@@ -1,11 +1,11 @@
-name: macpfinder
+name: ampfinder
 channels:
   - conda-forge
   - bioconda
   - defaults
 dependencies:
-  - python >= 3.6
-  - biopython 1.78
+  - python 3.8
+  - biopython 1.79
   - filetype >= 1.2.0
   - progress 1.6.0
   - pytest >= 3.0.0
@@ -21,3 +21,5 @@ dependencies:
   - fastp >=0.23.0
   - megahit 1.2.9
   - spades 3.15.5
+  - modlamp 4.2.1
+  - scikit-learn 0.24.1
