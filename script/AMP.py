@@ -5,6 +5,7 @@ from script.Spades import Spades
 from script.ORF import PyORF
 from script.Blast import Blast
 from script.Diamond import Diamond
+from script.Predict import Predict
 from script.settings import *
 from script.Base import*
 
@@ -248,7 +249,7 @@ class AMP(AMPBase):
 
     def run(self):
         self.make_output_directory()
-        # self.validate_inputs()
+        self.validate_inputs()
         if self.input_type == "read":
             self.qc_inputs()
         if self.input_type == "read":
@@ -390,12 +391,12 @@ class AMP(AMPBase):
     def run_pred(self):
         # run functional predict of AMPs.
         logger.info("Run functional predict of AMPs")
-        input_file = os.path.join(self.output_dir, "final.smorfs.fsa")
+        input_file = os.path.join(self.output_dir, "final.smorfs.L100.fsa")
 
         try:
             if os.stat(input_file).st_size > 0:
-                orf_obj = PyORF(input_file=input_file, output_dir=self.output_dir, num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
-                orf_obj.run()
+                ampfinder_obj = Predict(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.prediction"), num_threads=self.threads)
+                ampfinder_obj.run()
 
             else:
                 logger.error("The contigs file are empty!")
