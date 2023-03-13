@@ -1,4 +1,4 @@
-# AMPfinder V.1.1.0
+# AMPfinder V.1.0.0
 To provide more opportunities for clinical solutions, we were thus motivated to design a homology-based gene prediction program (AMPfinder), an integrated tool stream that combines ORF prediction, and AMP classification to extract AMPs directly from genome or proteome sequence data.
 
 1. AMPfinder is a simple, yet accurate, computational pipeline that processes either genomes and proteome sequences. The search for AMPs is based on alignment searching the existing antimicrobial peptide database and predicting on the feature model in amino acid sequence obtained from the translation of the original transcriptome sequence data. 
@@ -9,38 +9,39 @@ To provide more opportunities for clinical solutions, we were thus motivated to 
 ## Install Development Version
 ### Install Dependencies
 The following dependencies are required.
-- python 3.6
+- python 3.8
+- Biopython 1.79
+- Fastp 0.23.0
+- megahit 1.2.9
+- Spades 3.15.5
 - BLAST
 - DIAMOND
 - Prodigal 2.6.3
-- Biopython1.73
-- filetype 1.0.0+
+- modlamp 4.2.1
+- scikit-learn 0.24.1
 - pytest 3.0.0+
-- pandas 0.15.0+
-- seaborn 0.8.1+
-- pyfaidx 0.5.4.1+
-- pyahocorasick 1.1.7+
 
 ### Install AMPfinder
 
-We have already integrate the environment in `conda_env.yaml`. execute `conda env create --file conda_env.yaml` to install packages required in a new created `AVPIden` conda env.
+We have already integrate the environment in `conda_env.yaml`. 
+execute `conda env create --file conda_env.yaml` to install packages required in a new created `AMPfinder` conda env.
 
-Enter the enviornment with `conda activate macpfinder` before further executions.
+Enter the enviornment with `conda activate AMPfinder` before further executions.
 
-**Note**: Please ensure that all dependencies are installed before using mACPfinder
+**Note**: Please ensure that all dependencies are installed before using AMPfinder
 
 ### Usage
 #### Construct Database
 We provide a JSON format file, **ampfinder_210729.json**, which contains AMP sequences from [dbAMP](https://awi.cuhk.edu.cn/~dbAMP/ "dbAMP"). You can directly use this file and run the following command to construct the database.
 
-`python makedatabase.py database -i ampfinder_210729.json`
+`macpfinder load --input_json ampfinder_210729.json`
 
-Then you will see the following files in your directory.
-- protein_all.db.pin
-- protein_all.db.phr
-- protein_all.db.psq
-- protein_all.db.dmnd
-- database.fasta
+Then you will see the following files in your directory of `db/`.
+- _data/proteindb.fsa
+- _db/protein_all.db.pin
+- _db/protein_all.db.phr
+- _db/protein_all.db.psq
+- _db/protein_all.db.dmnd
 
 #### Running AMPfinder
 
