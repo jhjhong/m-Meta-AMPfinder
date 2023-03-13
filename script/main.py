@@ -1,6 +1,8 @@
 from script.settings import *
-from script.load import *
-from script.AMP import*
+from script.AMP import *
+import script.load
+import script.clean
+
 
 from progress.bar import Bar
 import argparse
@@ -14,9 +16,7 @@ class Main(object):
 
                 Database:
                 ---------------------------------------------------------------------------------------
-                auto_load   Automatically loads blast database, and installed mACPfinder databases
                 load        Loads mACPfinder database
-                install     Install related mACPfinder alignment database
                 clean       Removes current databases and temporary files
 
                 
@@ -30,27 +30,19 @@ class Main(object):
                 macpfinder load --input_json ampfinder_210729.json
 
                 run mACPfinder on paired-end reads:
-                macpfinder main -1 example_seqs/R1.fq.gz -2 example_seqs/R2.fq.gz -t read --output out_metag --outtag example_metag
+                macpfinder main --short1 examples/SRR10258541_1.fastq --short2 examples/SRR10258541_2.fastq --input_type read --output_dir test
 
-                
+                run mACPfinder on protein peptides:
+                macpfinder main --input_fasta examples/example_prot.fsa --input_type peptide --output_dir test
 
                 removes databases and temporary files:
                 macpfinder clean
                 
                 For more information,please read the docs: https://github.com/jhjhong/mACPfinder
                '''
-                # run mACPfinder on peptides:  
-                # macpfinder peptides --fasta example_seqs/expep.faa.gz --output out_peptides
-                
-                # run mACPfinder on contigs:
-                # macpfinder contigs --fasta example_seqs/excontigs.fna.gz --output out_contigs
-                
-                # run mACPfinder on paired-end reads:
-                # macpfinder reads -1 example_seqs/R1.fq.gz -2 example_seqs/R2.fq.gz --output out_metag --outtag example_metag
 
         parser = argparse.ArgumentParser(prog="macpfinder", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION), epilog=SOFTWARE_SUMMARY, usage=USAGE)
-        # parser.add_argument('command', choices=['peptides', 'contigs', 'reads', 'load', 'auto_load', 'clean'], help='Subcommand to run')
-        parser.add_argument('command', choices=['main', 'load', 'auto_load', 'clean'], help='Subcommand to run')
+        parser.add_argument('command', choices=['main', 'load', 'clean'], help='Subcommand to run')
 
         args=parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
@@ -124,73 +116,6 @@ class Main(object):
         #     self.logger.info('Command: {}'.format(' '.join(args)))
         amp_obj = AMP(**vars(args))
         amp_obj.run()
-
-
-    # def contigs(self):
-    #     parser = self.contigs_args()
-    #     if len(sys.argv) == 2:
-    #         parser.print_help(file=sys.stderr)
-    #         sys.exit(1)
-    #     args = parser.parse_args(sys.argv[2:])
-    #     self.contigs_run(args)
-
-    # def contigs_args(self):
-    #     parser = argparse.ArgumentParser(prog="macpfinder contigs",
-    #                                      description="{} - {} - main".format(APP_NAME, SOFTWARE_VERSION))
-    #     parser.add_argument('-i', '--input_fasta', dest="input_sequence", required=True, \
-    #                         help='input file must be in FASTA (contig and protein) format! e.g myFile.fasta')
-    #     parser.add_argument('-o', '--output_dir', required=True,
-    #                         help="path to the output directory")
-    #     parser.add_argument('-a', '--alignment_tool',
-    #                         type=str.upper,
-    #                         choices=['DIAMOND', 'BLAST'],
-    #                         default="BLAST",
-    #                         help="specify alignment tool (default = BLAST)")
-    #     parser.add_argument('-n', '--num_threads', type=int,
-    #                         default=self.cpu_count,
-    #                         help="number of threads (CPUs) to use in the BLAST search (default={})".format(
-    #                             self.cpu_count))
-    #     parser.add_argument('-v', '--version', action='version', version="{}".format(SOFTWARE_VERSION),
-    #                         help="show mACPfinder software version number")
-    #     return parser
-
-    # def contigs_run(self, args):
-    #     amp_obj = AMP(**vars(args))
-    #     amp_obj.run()
-    
-
-    # def peptides(self):
-    #     parser = self.peptides_args()
-    #     if len(sys.argv) == 2:
-    #         parser.print_help(file=sys.stderr)
-    #         sys.exit(1)
-    #     args = parser.parse_args(sys.argv[2:])
-    #     self.peptides_run(args)
-
-    # def peptides_args(self):
-    #     parser = argparse.ArgumentParser(prog="macpfinder peptides",
-    #                                      description="{} - {} - main".format(APP_NAME, SOFTWARE_VERSION))
-    #     parser.add_argument('-i', '--input_fasta', dest="input_sequence", required=True, \
-    #                         help='input file must be in FASTA (contig and protein) format! e.g myFile.fasta')
-    #     parser.add_argument('-o', '--output_dir', dest="output_dir", required=True,
-    #                         help="path to the output directory")
-    #     parser.add_argument('-a', '--alignment_tool', dest="aligner",
-    #                         type=str.upper,
-    #                         choices=['DIAMOND', 'BLAST'],
-    #                         default="BLAST",
-    #                         help="specify alignment tool (default = BLAST)")
-    #     parser.add_argument('-n', '--num_threads', dest="threads", type=int,
-    #                         default=self.cpu_count,
-    #                         help="number of threads (CPUs) to use in the BLAST search (default={})".format(
-    #                             self.cpu_count))
-    #     parser.add_argument('-v', '--version', action='version', version="{}".format(SOFTWARE_VERSION),
-    #                         help="show mACPfinder software version number")
-    #     return parser
-
-    # def peptides_run(self, args):
-    #     amp_obj = AMP(**vars(args))
-    #     amp_obj.run()
-
 
 if __name__ == '__main__':
     m = MainBase()
