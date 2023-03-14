@@ -213,7 +213,7 @@ class AMP(AMPBase):
             except Exception as e:
                 logger.error("invalid nucleotide fasta due to: {}".format(e))
                 return False
-        logger.info("valid nucleotide fasta: {}".format(nucleotide_dict))
+        logger.debug("valid nucleotide fasta: {}".format(nucleotide_dict))
         print("dna")
         return True
 
@@ -243,7 +243,7 @@ class AMP(AMPBase):
             logger.error("invalid protein fasta: {}".format(amino_acids_dict))
             return False
 
-        logger.info("valid protein fasta: {}".format(amino_acids_dict))
+        logger.debug("valid protein fasta: {}".format(amino_acids_dict))
         return True
 
 
