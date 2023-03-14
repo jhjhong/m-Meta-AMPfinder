@@ -2,9 +2,7 @@ from Bio import SeqIO
 from Bio.SeqUtils.ProtParam import ProteinAnalysis as PA
 from modlamp.descriptors import PeptideDescriptor, GlobalDescriptor
 import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 from script.settings import *
 import logging
 import pandas as pd
@@ -12,7 +10,6 @@ import os, re, math, platform, string, joblib
 from collections import Counter
 
 class Predict(object):
-
     def __init__(self,input_file, output_dir=None, num_threads=32):
         self.input_file = input_file
         self.output_dir = output_dir
@@ -22,10 +19,10 @@ class Predict(object):
         self.num_threads = num_threads
 
         # Miscellaneous
-        _AALetter = ['A', 'C', 'D', 'E', 'F', 'G', 'H',
-                    'I', 'K', 'L', 'M', 'N', 'P', 'Q',
-                    'R', 'S', 'T', 'V', 'W', 'Y']
-        _IrrLetter = list(set(string.ascii_uppercase) - set(_AALetter))
+        # _AALetter = ['A', 'C', 'D', 'E', 'F', 'G', 'H',
+        #             'I', 'K', 'L', 'M', 'N', 'P', 'Q',
+        #             'R', 'S', 'T', 'V', 'W', 'Y']
+        # _IrrLetter = list(set(string.ascii_uppercase) - set(_AALetter))
 
 
     '''
