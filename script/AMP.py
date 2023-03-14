@@ -261,7 +261,7 @@ class AMP(AMPBase):
                 qc_obj.run()
 
         except Exception as e:
-            logger.exception("failed to write orf file")
+            logger.exception("failed to write qc file")
         else:
             pass
     
@@ -301,7 +301,7 @@ class AMP(AMPBase):
                 logger.info("Sequence assembly complete.")
 
         except Exception as e:
-            logger.exception("failed to write orf file")
+            logger.exception("failed to write assembly file")
         else:
             pass
     
@@ -332,7 +332,7 @@ class AMP(AMPBase):
                 logger.info("Sequence assembly complete.")
 
         except Exception as e:
-            logger.exception("failed to write orf file")
+            logger.exception("failed to write assembly file")
         else:
             pass
 
@@ -388,7 +388,7 @@ class AMP(AMPBase):
                 logger.info("Sequence alignment complete.")
 
         except Exception as e:
-            logger.exception("failed to write orf file")
+            logger.exception("failed to write alignment file")
         else:
             pass
 
@@ -418,8 +418,9 @@ class AMP(AMPBase):
                 and os.path.exists(os.path.join(self.output_dir, "final.predictAMP.csv")) == True \
                 and os.path.exists(os.path.join(self.output_dir, "final.predictAMP.json")) == True:
                 logger.info("Functional prediction complete.")
+                logger.info("{} pipeline conplete.".format(APP_NAME))
 
         except Exception as e:
-            logger.exception("failed to write orf file")
+            logger.exception("failed to write prediction file")
         else:
             pass
