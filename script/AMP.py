@@ -50,10 +50,11 @@ class AMP(AMPBase):
         if not os.path.exists(self.output_dir):
             try:
                 os.makedirs(self.output_dir)
+                logger.info("Making output directory: {}".format(self.output_dir))
             except OSError:
-                logger.error("mACPfinder was unable to make the output directory")
+                logger.error("{} was unable to make the output directory".format(APP_NAME))
                 exit()
-            logger.info("Making output directory: {}".format(self.output_dir))
+            
         elif os.listdir(self.output_dir):
             logger.warning("The output directory {} already exists, please change the parameter -o to another value to avoid overwriting.".format(self.output_dir))
             # exit()
@@ -77,7 +78,7 @@ class AMP(AMPBase):
                 exit()
             else:
                 # assign umcompressed short1 
-                logger.info("Input short1: {} => {}".format(self.short1, filetype.guess(self.short1)))
+                logger.debug("Input short1: {} => {}".format(self.short1, filetype.guess(self.short1)))
                 if self.check_filetype(self.short1) == None:
                     pass
                 else:
@@ -91,7 +92,7 @@ class AMP(AMPBase):
                         logger.error("first and second read pair files cannot be the same file")
                         exit()
                     # assign umcompressed short2
-                    logger.info("Input short2: {} => {}".format(self.short2, filetype.guess(self.short2)))
+                    logger.debug("Input short2: {} => {}".format(self.short2, filetype.guess(self.short2)))
                     if self.check_filetype(self.short2) == None:
                         pass
                     else:
@@ -102,11 +103,12 @@ class AMP(AMPBase):
         elif self.input_type in ["contig", "peptide"]:
             if not self.input_sequence:
                 logger.error("FASTA File is necessary for 'contigs/peptides' command.")
+                exit()
             if not os.path.exists(self.input_sequence):
                 logger.error("input file does not exist: {}".format(self.input_sequence))
                 exit()
             else:
-                logger.info("Input sequence: {} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
+                logger.debug("Input sequence: {} => {}".format(self.input_sequence, filetype.guess(self.input_sequence)))
                 if self.check_filetype(self.input_sequence) == None:
                     pass
                 else:
@@ -115,15 +117,12 @@ class AMP(AMPBase):
 
         if self.threads > os.cpu_count():
             logger.error(
-                "Argument num_threads illegal value, expected (>=1 and =<{}):  given `{}`)".format(os.cpu_count(),
-                                                                                                   self.threads))
+                "Argument num_threads illegal value, expected (>=1 and =<{}):  given `{}`)".format(os.cpu_count(), self.threads))
             exit()
 
     def check_filetype(self, file):
         kind = filetype.guess(file)
         if kind is None:
-            # print("TEST THIS")
-            # print("CHECK", self.is_fasta(file))
             if self.is_fasta(file) == False:
                 logger.error("invalid fasta")
                 exit()
@@ -154,18 +153,13 @@ class AMP(AMPBase):
         if extension is None:
             with open(file, "r") as handle:
                 fasta = SeqIO.parse(handle, "fasta")
-# 有bug
-                # print("RIGHT")
+                # 有bug
                 self.check_record(fasta)
                 return True
         elif extension in ["gz", "bz2"]:
             if extension == "gz":
-                # print("GZ")
-                # print(file)
                 with gzip.open(file, "rt") as handle:
                     fasta = SeqIO.parse(handle, "fasta")
-                    # print("check_record")
-                    print(self.check_record(fasta))
             else:
                 with bz2.open(file, "rt") as handle:
                     fasta = SeqIO.parse(handle, "fasta")
@@ -176,21 +170,16 @@ class AMP(AMPBase):
 
     def check_record(self, fasta):
         # check each record in the file
- #       print("!!!")
- #       print(self.input_type)
- #       print(fasta)
         for record in fasta:
-# for loop 進不來, hen 怪
-            print("HERE")
+            # for loop 進不來, hen 怪
             if any(record.id) == False or any(record.seq) == False:
                 return False
             if self.input_type in ["read", "contig"]:
-                print("READS")
                 return self.is_dna(record.seq)
-            if self.input_type == "peptide":
+            if self.input_type == "protein":
                 return self.is_protein(record.seq)
     
-    # @staticmethod
+    @staticmethod
     def is_dna(sequence):
         #  dna codes
         nucleotide_dict = {'A': 0, 'T': 0, 'G': 0, 'C': 0, 'N': 0, 'U': 0,
@@ -214,7 +203,6 @@ class AMP(AMPBase):
                 logger.error("invalid nucleotide fasta due to: {}".format(e))
                 return False
         logger.debug("valid nucleotide fasta: {}".format(nucleotide_dict))
-        print("dna")
         return True
 
     @staticmethod
@@ -264,6 +252,7 @@ class AMP(AMPBase):
     def qc_inputs(self):
         # run fastp for quality control: remove N base.
         try:
+            logger.info("Step: Quality Control by Fastp.")
             if self.short2:
                 qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
                 qc_obj.run()
@@ -293,7 +282,7 @@ class AMP(AMPBase):
             short2 = os.path.basename(self.short2)
             highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short2.split(".")[0]))
         try:
-            logger.info("Run Megahit assembler")
+            logger.info("Step: Sequence assembly by Megahit. Please be patient...")
             if self.short2:
                 if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0:
                     megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
@@ -306,6 +295,11 @@ class AMP(AMPBase):
                     megahit_obj.run()
                 else:
                     logger.error("Each sequence quality are low!")
+
+            if os.path.isfile(os.path.join(self.output_dir, "final.contigs.fasta")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.contigs.fasta")) == True:
+                logger.info("Sequence assembly complete.")
+
         except Exception as e:
             logger.exception("failed to write orf file")
         else:
@@ -319,7 +313,7 @@ class AMP(AMPBase):
             short2 = os.path.basename(self.short2)
             highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short2.split(".")[0]))
         try:
-            logger.info("Run Metaspades assembler")
+            logger.info("Step: Sequence assembly by Spades. Please be patient...")
             if self.short2:
                 if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0:
                     metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
@@ -332,6 +326,11 @@ class AMP(AMPBase):
                     metaspades_obj.run()
                 else:
                     logger.error("Each sequence quality are low!")
+
+            if os.path.isfile(os.path.join(self.output_dir, "final.contigs.fasta")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.contigs.fasta")) == True:
+                logger.info("Sequence assembly complete.")
+
         except Exception as e:
             logger.exception("failed to write orf file")
         else:
@@ -339,19 +338,24 @@ class AMP(AMPBase):
 
     def run_smorfs(self):
         # run pyrodigal to predict genes.
-        logger.info("Run Pyrodigal ORFfinder")
         input_file = os.path.join(self.output_dir, "final.contigs.fasta")
 
         self.clean = True
         self.low_quality = False
 
         try:
+            logger.info("Step: ORFfinder by Pyrodigal.")
             if os.stat(input_file).st_size > 0:
                 orf_obj = PyORF(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.smorfs"), num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
                 orf_obj.run()
 
             else:
                 logger.error("The contigs file are empty!")
+
+            if os.path.isfile(os.path.join(self.output_dir, "final.smorfs.fsa")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.smorfs.fsa")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.smorfs.L100.fsa")) == True:
+                logger.info("Get ORF complete.")
 
         except Exception as e:
             logger.exception("failed to write orf file")
@@ -361,7 +365,6 @@ class AMP(AMPBase):
 
     def run_blast(self):
         # Process blast sequence(s).
-        logger.info("Run alignment against AMPdb for known AMPs")
         if self.input_type == "peptide":
             input_file = self.input_sequence
         elif self.input_type in ["read", "contig"]:
@@ -370,13 +373,20 @@ class AMP(AMPBase):
         try:
             if os.stat(input_file).st_size > 0:
                 if self.aligner == "diamond":
+                    logger.info("Step: Sequence alignment against AMPdb for known AMPs by DIAMOND. Please be patient...")
                     diamond_obj = Diamond(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.alignment"), num_threads=self.threads)
                     diamond_obj.run()
                 else:
+                    logger.info("Step: Sequence alignment against AMPdb for known AMPs by blast. Please be patient...")
                     blast_obj = Blast(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.alignment"), num_threads=self.threads)
                     blast_obj.run()
             else:
                 self.write_stub_output_file()
+
+            if os.path.isfile(os.path.join(self.output_dir, "final.alignment.txt")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.alignment.txt")) == True:
+                logger.info("Sequence alignment complete.")
+
         except Exception as e:
             logger.exception("failed to write orf file")
         else:
@@ -390,19 +400,24 @@ class AMP(AMPBase):
 
     def run_pred(self):
         # run functional predict of AMPs.
-        logger.info("Run functional predict of AMPs")
         if self.input_type == "peptide":
             input_file = self.input_sequence
         elif self.input_type in ["read", "contig"]:
             input_file = os.path.join(self.output_dir, "final.smorfs.L100.fsa")
 
         try:
+            logger.info("Step: Functional prediction of potential AMPs.")
             if os.stat(input_file).st_size > 0:
                 ampfinder_obj = Predict(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.prediction"), num_threads=self.threads)
                 ampfinder_obj.run()
 
             else:
                 logger.error("The contigs file are empty!")
+
+            if os.path.isfile(os.path.join(self.output_dir, "final.predictAMP.csv")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.predictAMP.csv")) == True \
+                and os.path.exists(os.path.join(self.output_dir, "final.predictAMP.json")) == True:
+                logger.info("Functional prediction complete.")
 
         except Exception as e:
             logger.exception("failed to write orf file")
