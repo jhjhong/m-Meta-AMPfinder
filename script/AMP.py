@@ -44,6 +44,18 @@ class AMP(AMPBase):
         self.dp = data_path
 
         super(AMPBase, self).__init__()
+
+    def check_db(self):
+        if os.path.exists(db_path) == True \
+            and os.path.isfile(os.path.join(data_path, "proteindb.fsa")) == True \
+            and os.path.exists(os.path.join(data_path, "proteindb.fsa")) == True \
+            and os.path.exists(os.path.join(path, "protein.db.phr")) == True \
+            and os.path.exists(os.path.join(path, "protein.db.pin")) == True \
+            and os.path.exists(os.path.join(path, "protein.db.psq")) == True:
+            pass
+        else:
+            logger.error("Current database not exists, you must build default BLAST and DIAMOND databases through the following command: python macpfinder load --input_json ampfinder_210729.json")
+            exit()
     
     def make_output_directory(self):
         # Creates the output directory, if it doesn't already exist.
@@ -236,6 +248,7 @@ class AMP(AMPBase):
 
 
     def run(self):
+        self.check_db()
         self.make_output_directory()
         self.validate_inputs()
         if self.input_type == "read":
@@ -338,7 +351,10 @@ class AMP(AMPBase):
 
     def run_smorfs(self):
         # run pyrodigal to predict genes.
-        input_file = os.path.join(self.output_dir, "final.contigs.fasta")
+        if self.input_type == "contig":
+            input_file = self.input_sequence
+        elif self.input_type == "read":
+            input_file = os.path.join(self.output_dir, "final.contigs.fasta")
 
         self.clean = True
         self.low_quality = False
