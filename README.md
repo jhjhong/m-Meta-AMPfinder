@@ -10,8 +10,8 @@ To provide more opportunities for clinical solutions, we were thus motivated to 
 ##  Publications
 
 > Jhong, J.H., et al., 
-> dbAMP 2.0: updated resource for antimicrobial peptides with an enhanced scanning method for genomic and proteomic data. Nucleic Acids Res. (2021)
-> [10.1093/nar/gkab1080](https://doi.org/10.1093/nar/gkab1080).
+> dbAMP 2.0: updated resource for antimicrobial peptides with an enhanced scanning method for genomic and proteomic data. Nucleic Acids Res (2021).
+> [10.1093/nar/gkab1080](https://doi.org/10.1093/nar/gkab1080)
 
 
 ## Install Development Version
