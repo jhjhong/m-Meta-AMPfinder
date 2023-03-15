@@ -62,6 +62,19 @@ class Main(object):
 
     def load_run(self, args):
         script.load.main(args)
+
+
+    def clean(self):
+        parser = self.clean_args()
+        args = parser.parse_args(sys.argv[2:])
+        self.clean_run(args)
+
+    def clean_args(self):
+        parser = script.clean.create_parser()
+        return parser
+
+    def clean_run(self, args):
+        script.clean.main(args)
     
 # ====================================================================================
 # main 
