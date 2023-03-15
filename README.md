@@ -7,6 +7,10 @@ To provide more opportunities for clinical solutions, we were thus motivated to 
 
 <p align="center"><img src="images/workflow.png" alt="AMPfinder" width="600"></p>
 
+##  Publications
+
+[Jhong, J.H., et al., dbAMP 2.0: updated resource for antimicrobial peptides with an enhanced scanning method for genomic and proteomic data. Nucleic Acids Res, 2021.](https://academic.oup.com/nar/article/50/D1/D460/6445964?login=false).
+
 
 ## Install Development Version
 ### Install Dependencies
