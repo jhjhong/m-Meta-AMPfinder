@@ -30,10 +30,14 @@ class Main(object):
                 macpfinder load --input_json ampfinder_210729.json
 
                 run mACPfinder on paired-end reads:
-                macpfinder main --short1 examples/SRR10258541_1.fastq --short2 examples/SRR10258541_2.fastq --input_type read --output_dir test
+                macpfinder main --short1 examples/example_read1.fastq --short2 examples/example_read2.fastq --input_type read --output_dir test
+
+                run mACPfinder on genome contigs:
+                macpfinder main --input_fasta examples/example_contig.fsa --input_type contig --output_dir test
 
                 run mACPfinder on protein peptides:
                 macpfinder main --input_fasta examples/example_prot.fsa --input_type peptide --output_dir test
+
 
                 removes databases and temporary files:
                 macpfinder clean
