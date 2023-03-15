@@ -5,6 +5,8 @@ To provide more opportunities for clinical solutions, we were thus motivated to 
 
 2. AMPfinder is a free software tool that combines ORF prediction and accurately classification of the AMPs from protein or nucleotide data, which performs translation of the input transcriptome data by using Prodigal, and selects short sequences containing ORF and signal peptide cleavage sites. Then, by default, DIAMOND and BLAST were used for homology detection and machine learning prediction model were used to search for potential AMPs, in which case all known or potential motifs will be revealed and classified. Due to the combination of various search methods, AMPfinder searcher allows to obtain the most complete repertoire of AMPs for one or more transcriptomes in a short amount of time. Therefore, AMPfinder seems to be the most suitable tool for rapid screening of potential AMPs.
 
+.. image:: images/rgiwheel.jpg
+
 
 ## Install Development Version
 ### Install Dependencies
@@ -30,8 +32,8 @@ Enter the enviornment with `conda activate AMPfinder` before further executions.
 
 **Note**: Please ensure that all dependencies are installed before using AMPfinder
 
-### Usage
-#### Construct Database
+## Getting started
+### Construct Database
 We provide a JSON format file, **ampfinder_210729.json**, which contains AMP sequences from [dbAMP](https://awi.cuhk.edu.cn/~dbAMP/ "dbAMP"). You can directly use this file and run the following command to construct the database.
 
 `macpfinder load --input_json ampfinder_210729.json`
@@ -43,10 +45,11 @@ Then you will see the following files in your directory of `db/`.
 - _db/protein_all.db.psq
 - _db/protein_all.db.dmnd
 
-#### Running AMPfinder
+### Running AMPfinder
 
 We provided two test files: **example_protein.fasta** and **example_dna.fasta**. 
 The following command will bring up AMPfinder's main help menu:
+
 `python ampfinder main -h`
 
     AMPfinder - 1.1.0 - main
