@@ -127,10 +127,7 @@ class Main(object):
         return parser
 
     def main_run(self, args):
-        print(vars(args))
-        # args = ['gtdbtk', 'classify_wf', '--genome_dir', genome_test_dir,
-        #             '--out_dir', output_dir, '--cpus', str(options.cpus), '-f']
-        #     self.logger.info('Command: {}'.format(' '.join(args)))
+        logger.info(vars(args))
         amp_obj = AMP(**vars(args))
         amp_obj.run()
 
