@@ -99,31 +99,31 @@ class Main(object):
                             help='FASTQ file (metagenomics reads required) of first short reads in each pair')
         parser.add_argument('-2', '--short2', required=False, \
                             help='FASTQ file (metagenomics reads required) of second short reads in each pair')
-        parser.add_argument('-i', '--input_fasta', dest="input_sequence", required=False, \
+        parser.add_argument('-i', '--input_fasta', required=False, dest='input_sequence', \
                             help='input file must be in FASTA (contig and peptide required) format!')
         parser.add_argument('-o', '--output_dir', required=True,
-                            help="path to the output directory (required)")
-        parser.add_argument('-t', '--input_type', dest="input_type",
+                            help='path to the output directory (required)')
+        parser.add_argument('-t', '--input_type', dest='input_type',
                             type=str.lower,
                             choices=['read', 'contig', 'peptide'],
                             required=True,
-                            help='specify data input type')
-        parser.add_argument('-n', '--num_threads', type=int, dest="threads",
+                            help='specify data input type (required)')
+        parser.add_argument('-n', '--num_threads', type=int, dest='threads',
                             default=self.cpu_count,
-                            help="number of threads (CPUs) to use in the BLAST search (default={})".format(self.cpu_count))
-        parser.add_argument('--assembler', dest="assembler",
+                            help='number of threads (CPUs) to use in the BLAST search (default={})'.format(self.cpu_count))
+        parser.add_argument('--assembler', dest='assembler',
                             type=str.lower,
                             choices=['megahit', 'metaspades'],
-                            default="megahit",
-                            help="specify assembler tool (default = megahit)")
-        parser.add_argument('--alignment_tool', dest="aligner",
+                            default='megahit',
+                            help='specify assembler tool (default = megahit)')
+        parser.add_argument('--alignment_tool', dest='aligner',
                             type=str.upper,
                             choices=['DIAMOND', 'BLAST'],
-                            default="DIAMOND",
-                            help="specify alignment tool (default = BLAST)")
-        parser.add_argument('-v', '--version', action='version', version="{}".format(SOFTWARE_VERSION),
-                            help="show mACPfinder software version number")
-        parser.add_argument('--debug', dest="debug", action="store_true", help="debug mode")
+                            default='DIAMOND',
+                            help='specify alignment tool (default = BLAST)')
+        parser.add_argument('-v', '--version', action='version', version='{}'.format(SOFTWARE_VERSION),
+                            help='show mACPfinder software version number')
+        parser.add_argument('--debug', dest='debug', action='store_true', help='debug mode')
         return parser
 
     def main_run(self, args):
