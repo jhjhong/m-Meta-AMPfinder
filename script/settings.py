@@ -46,8 +46,8 @@ logger.addHandler(stream_handler)
 # ====================================================================================
 # APP INFO
 # ====================================================================================
-APP_NAME="m(Meta)ACPfinder"
-SOFTWARE_VERSION = "v1.0.0"
-SOFTWARE_SUMMARY = 'Use the m(Meta)ACPfinder to predict candidate ACP from protein or nucleotide'
+APP_NAME="m(Meta)AMPfinder"
+SOFTWARE_VERSION = "v1.1.0"
+SOFTWARE_SUMMARY = 'Use the m(Meta)AMPfinder to predict candidate AMP from protein or nucleotide'
 
 PATH = os.getcwd()
