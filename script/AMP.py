@@ -434,7 +434,7 @@ class AMP(AMPBase):
                 and os.path.exists(os.path.join(self.output_dir, "final.predictAMP.csv")) == True \
                 and os.path.exists(os.path.join(self.output_dir, "final.predictAMP.json")) == True:
                 logger.info("Functional prediction complete.")
-                logger.info("{} pipeline conplete.".format(APP_NAME))
+                logger.info("{} pipeline complete.".format(APP_NAME))
 
         except Exception as e:
             logger.exception("failed to write prediction file")
