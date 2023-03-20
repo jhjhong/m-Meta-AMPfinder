@@ -265,7 +265,7 @@ class AMP(AMPBase):
     def qc_inputs(self):
         # run fastp for quality control: remove N base.
         try:
-            logger.info("Step: Quality Control by Fastp.")
+            logger.info("[Step] Quality Control by Fastp.")
             if self.short2:
                 qc_obj = Fastp(short1=self.short1, short2=self.short2, output_dir=os.path.join(self.output_dir, "temp.qc"), num_threads=self.threads)
                 qc_obj.run()
@@ -295,7 +295,7 @@ class AMP(AMPBase):
             short2 = os.path.basename(self.short2)
             highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short2.split(".")[0]))
         try:
-            logger.info("Step: Sequence assembly by Megahit. Please be patient...")
+            logger.info("[Step] Sequence assembly by Megahit. Please be patient...")
             if self.short2:
                 if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0:
                     megahit_obj = Megahit(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
@@ -326,7 +326,7 @@ class AMP(AMPBase):
             short2 = os.path.basename(self.short2)
             highqual_fsa_file_2 = os.path.join(self.output_dir, "temp.qc/{}.temp.highqual.fq".format(short2.split(".")[0]))
         try:
-            logger.info("Step: Sequence assembly by Spades. Please be patient...")
+            logger.info("[Step] Sequence assembly by Spades. Please be patient...")
             if self.short2:
                 if os.stat(highqual_fsa_file_1).st_size > 0 and os.stat(highqual_fsa_file_2).st_size > 0:
                     metaspades_obj = Spades(input1=highqual_fsa_file_1, input2=highqual_fsa_file_2, output_dir=self.output_dir, num_threads=self.threads)
@@ -360,7 +360,7 @@ class AMP(AMPBase):
         self.low_quality = False
 
         try:
-            logger.info("Step: ORFfinder by Pyrodigal.")
+            logger.info("[Step] ORFfinder by Pyrodigal.")
             if os.stat(input_file).st_size > 0:
                 orf_obj = PyORF(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.smorfs"), num_threads=self.threads, clean=self.clean, low_quality=self.low_quality)
                 orf_obj.run()
@@ -389,7 +389,7 @@ class AMP(AMPBase):
         try:
             if os.stat(input_file).st_size > 0:
                 if self.aligner == "diamond":
-                    logger.info("Step: Sequence alignment against AMPdb for known AMPs by DIAMOND. Please be patient...")
+                    logger.info("[Step] Sequence alignment against AMPdb for known AMPs by DIAMOND. Please be patient...")
                     diamond_obj = Diamond(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.alignment"), num_threads=self.threads)
                     diamond_obj.run()
                 else:
@@ -422,7 +422,7 @@ class AMP(AMPBase):
             input_file = os.path.join(self.output_dir, "final.smorfs.L100.fsa")
 
         try:
-            logger.info("Step: Functional prediction of potential AMPs.")
+            logger.info("[Step] Functional prediction of potential AMPs.")
             if os.stat(input_file).st_size > 0:
                 ampfinder_obj = Predict(input_file=input_file, output_dir=os.path.join(self.output_dir, "temp.prediction"), num_threads=self.threads)
                 ampfinder_obj.run()

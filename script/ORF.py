@@ -51,7 +51,6 @@ class PyORF(object):
             pass
 
     def run(self):
-        logger.info("predict ORF")
         minimum_sequence_length, maximum_sequence_length, number_of_sequences = self.min_max_sequence_length()
 
         quality = "-n -p single"
