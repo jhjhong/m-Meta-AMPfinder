@@ -78,5 +78,5 @@ The following command will bring up AMPfinder's main help menu:
                             specify assembler tool (default = megahit)
       --alignment_tool {DIAMOND,BLAST}
                             specify alignment tool (default = BLAST)
-      -v, --version         show mACPfinder software version number
+      -v, --version         show mAMPfinder software version number
       --debug               debug mode
