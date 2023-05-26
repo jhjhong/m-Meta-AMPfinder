@@ -31,8 +31,8 @@ The following dependencies are required.
 
 ### Install AMPfinder
 
-We have already integrate the environment in `conda_env.yaml`. 
-execute `conda env create --file conda_env.yaml` to install packages required in a new created `AMPfinder` conda env.
+We have already integrate the environment in `conda_env.yml`. 
+execute `conda env create --file conda_env.yml` to install packages required in a new created `AMPfinder` conda env.
 
 Enter the enviornment with `conda activate AMPfinder` before further executions.
 
@@ -56,19 +56,27 @@ Then you will see the following files in your directory of `db/`.
 We provided two test files: **example_protein.fasta** and **example_dna.fasta**. 
 The following command will bring up AMPfinder's main help menu:
 
-`python ampfinder main -h`
+`python mampfinder main -h`
 
     AMPfinder - 1.1.0 - main
     
     optional arguments:
       -h, --help            show this help message and exit
+      -1 SHORT1, --short1 SHORT1
+                        FASTQ file (metagenomics reads required) of first short reads in each pair
+      -2 SHORT2, --short2 SHORT2
+                        FASTQ file (metagenomics reads required) of second short reads in each pair
       -i INPUT_SEQUENCE, --input_sequence INPUT_SEQUENCE
-                            input file must be in FASTA (contig and protein) format! e.g myFile.fasta
-      -o OUTPUT_FILE, --output_file OUTPUT_FILE
-                            output folder and base filename
-      -t {contig,protein}, --input_type {contig,protein}
-                            specify data input type (default = contig)
-      -a {DIAMOND,BLAST}, --alignment_tool {DIAMOND,BLAST}
-                            specify alignment tool (default = BLAST)
+                            input file must be in FASTA (contig and peptide required) format!
+      -o OUTPUT_DIR, --output_dir OUTPUT_DIR
+                        path to the output directory (required)
+      -t {read,contig,peptide}, --input_type {read,contig,peptide}
+                            specify data input type (required)
       -n THREADS, --num_threads THREADS
-                            number of threads (CPUs) to use in the BLAST search (default=48)
+                            number of threads (CPUs) to use in the BLAST search (default=16)
+      --assembler {megahit,metaspades}
+                            specify assembler tool (default = megahit)
+      --alignment_tool {DIAMOND,BLAST}
+                            specify alignment tool (default = BLAST)
+      -v, --version         show mACPfinder software version number
+      --debug               debug mode

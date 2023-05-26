@@ -50,7 +50,7 @@ def main(args):
 
 
 def create_parser():
-	parser = argparse.ArgumentParser(prog="macpfinder clean", description="{} - {} - Clean".format(APP_NAME, SOFTWARE_VERSION))
+	parser = argparse.ArgumentParser(prog="mampfinder clean", description="{} - {} - Clean".format(APP_NAME, SOFTWARE_VERSION))
 	parser.add_argument('--debug', dest="debug", action="store_true", help="debug mode")
 	return parser
 

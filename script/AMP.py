@@ -54,7 +54,7 @@ class AMP(AMPBase):
             and os.path.exists(os.path.join(path, "protein.db.psq")) == True:
             pass
         else:
-            logger.error("Current database not exists, you must build default BLAST and DIAMOND databases through the following command: python macpfinder load --input_json ampfinder_210729.json")
+            logger.error("Current database not exists, you must build default BLAST and DIAMOND databases through the following command: python mampfinder load --input_json ampfinder_210729.json")
             exit()
     
     def make_output_directory(self):

@@ -16,36 +16,36 @@ class Main(object):
 
                 Database:
                 ---------------------------------------------------------------------------------------
-                load        Loads mACPfinder database
+                load        Loads mAMPfinder database
                 clean       Removes current databases and temporary files
 
                 
-                m(Meta)ACPfinder:
+                m(Meta)AMPfinder:
                 ---------------------------------------------------------------------------------------
-                main        Runs mACPfinder application
+                main        Runs mAMPfinder application
 
             Examples:
             
                 parse blast database:
-                macpfinder load --input_json ampfinder_210729.json
+                mampfinder load --input_json ampfinder_210729.json
 
-                run mACPfinder on paired-end reads:
-                macpfinder main --short1 examples/example_read1.fastq --short2 examples/example_read2.fastq --input_type read --output_dir test
+                run mAMPfinder on paired-end reads:
+                mampfinder main --short1 examples/example_read1.fastq --short2 examples/example_read2.fastq --input_type read --output_dir test
 
-                run mACPfinder on genome contigs:
-                macpfinder main --input_fasta examples/example_contig.fsa --input_type contig --output_dir test
+                run mAMPfinder on genome contigs:
+                mampfinder main --input_fasta examples/example_contig.fsa --input_type contig --output_dir test
 
-                run mACPfinder on protein peptides:
-                macpfinder main --input_fasta examples/example_prot.fsa --input_type peptide --output_dir test
+                run mAMPfinder on protein peptides:
+                mampfinder main --input_fasta examples/example_prot.fsa --input_type peptide --output_dir test
 
 
                 removes databases and temporary files:
-                macpfinder clean
+                mampfinder clean
                 
-                For more information,please read the docs: https://github.com/jhjhong/mACPfinder
+                For more information,please read the docs: https://github.com/jhjhong/m-Meta-AMPfinder
                '''
 
-        parser = argparse.ArgumentParser(prog="macpfinder", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION), epilog=SOFTWARE_SUMMARY, usage=USAGE)
+        parser = argparse.ArgumentParser(prog="mampfinder", description='{} - {}'.format(APP_NAME, SOFTWARE_VERSION), epilog=SOFTWARE_SUMMARY, usage=USAGE)
         parser.add_argument('command', choices=['main', 'load', 'clean'], help='Subcommand to run')
 
         args=parser.parse_args(sys.argv[1:2])
@@ -93,7 +93,7 @@ class Main(object):
         self.main_run(args)
 
     def main_args(self):
-        parser = argparse.ArgumentParser(prog="macpfinder main",
+        parser = argparse.ArgumentParser(prog="mampfinder main",
                                          description="{} - {} - main".format(APP_NAME, SOFTWARE_VERSION))
         parser.add_argument('-1', '--short1', required=False, \
                             help='FASTQ file (metagenomics reads required) of first short reads in each pair')
@@ -122,7 +122,7 @@ class Main(object):
                             default='DIAMOND',
                             help='specify alignment tool (default = BLAST)')
         parser.add_argument('-v', '--version', action='version', version='{}'.format(SOFTWARE_VERSION),
-                            help='show mACPfinder software version number')
+                            help='show mAMPfinder software version number')
         parser.add_argument('--debug', dest='debug', action='store_true', help='debug mode')
         return parser
 

@@ -40,7 +40,7 @@ def main(args):
 
 
 def create_parser():
-	parser = argparse.ArgumentParser(prog="macpfinder load", description="{} - {} - Load".format(APP_NAME, SOFTWARE_VERSION))
+	parser = argparse.ArgumentParser(prog="mampfinder load", description="{} - {} - Load".format(APP_NAME, SOFTWARE_VERSION))
 	parser.add_argument('-i', '--input_json', required=True, help="input file must be in json format! e.g ampfinder_210729.json")
 	parser.add_argument('--debug', dest="debug", action="store_true", help="debug mode")
 	return parser
